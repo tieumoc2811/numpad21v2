@@ -14,9 +14,16 @@ jobs:
           arduino-cli config add board_manager.additional_urls https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
           arduino-cli core update-index
           arduino-cli core install adafruit:nrf52@1.7.0
+      - name: Tao adafruit-nrfutil gia (core 1.7.0 goi no de dong goi DFU .zip, ta chi can file .hex)
+        run: |
+          mkdir -p "$HOME/bin"
+          printf '#!/bin/sh\nexit 0\n' > "$HOME/bin/adafruit-nrfutil"
+          chmod +x "$HOME/bin/adafruit-nrfutil"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
       - name: Build
         run: |
           arduino-cli compile --fqbn adafruit:nrf52:feather52840 --output-dir out firmware/numpad21
+          ls -la out
       - name: Chuyen hex -> UF2
         run: |
           curl -sL -O https://raw.githubusercontent.com/microsoft/uf2/master/utils/uf2conv.py
