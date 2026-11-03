@@ -1,0 +1,28 @@
+name: Build Numpad21 firmware (nRF52840)
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: Cai core Adafruit nRF52 1.7.0 (SoftDevice S140 6.1.1, khop bootloader nice!nano)
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://adafruit.github.io/arduino-board-index/package_adafruit_index.json
+          arduino-cli core update-index
+          arduino-cli core install adafruit:nrf52@1.7.0
+      - name: Build
+        run: |
+          arduino-cli compile --fqbn adafruit:nrf52:feather52840 --output-dir out firmware/numpad21
+      - name: Chuyen hex -> UF2
+        run: |
+          curl -sL -O https://raw.githubusercontent.com/microsoft/uf2/master/utils/uf2conv.py
+          curl -sL -O https://raw.githubusercontent.com/microsoft/uf2/master/utils/uf2families.json
+          python3 uf2conv.py out/numpad21.ino.hex -c -f 0xADA52840 -o numpad21_nrf52840.uf2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: numpad21_nrf52840_uf2
+          path: numpad21_nrf52840.uf2
