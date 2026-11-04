@@ -738,6 +738,51 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
 .device .np .key .kn.wide.l1{font-size:30cqw}.device .np .key .kn.wide.l2{font-size:24cqw}.device .np .key .kn.wide.l3{font-size:18cqw}
 .device{padding:24px 22px 14px}.device .npboard{padding:11px 11px 14px}.np-head{height:50px}.np-knob{width:46px;height:46px}.np-knob b{font-size:12px}.np-leds{margin-top:24px}.device .np{--g:6px}
 .mac-list{max-height:560px;overflow-y:auto;padding-right:4px}
+
+/* ===== Morse ===== */
+.mo-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+.mo-col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.mo-screen{position:relative;min-height:96px;max-height:220px;overflow:auto;padding:14px 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--input-bg);font:500 20px/1.45 var(--mono);color:var(--text);white-space:pre-wrap;word-break:break-all;cursor:text;outline:none}
+.mo-screen:focus{border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(34,211,238,.16)}
+.mo-screen em{position:absolute;left:16px;top:14px;right:16px;font:400 12.5px/1.5 var(--sans);font-style:normal;color:var(--faint);pointer-events:none}
+.mo-screen.has em{display:none}
+.mo-caret{display:inline-block;width:2px;height:1.1em;vertical-align:text-bottom;background:var(--accent-2);margin-left:1px;animation:moBlink 1s steps(1) infinite}
+@keyframes moBlink{50%{opacity:0}}
+.mo-state{display:grid;grid-template-columns:auto auto 1fr;gap:10px 22px;margin-top:12px;align-items:start}
+.mo-state small{display:block;font:600 8.5px/1 var(--mono);letter-spacing:.8px;color:var(--faint);text-transform:uppercase;margin-bottom:6px}
+.mo-code{font:700 20px/1 var(--mono);letter-spacing:3px;color:var(--accent-2);min-width:60px;display:block}
+.mo-shown{font:700 20px/1 var(--mono);color:var(--text);display:block;min-width:40px}
+.mo-next div{display:flex;flex-wrap:wrap;gap:6px}
+.mo-chip{font:600 11px/1 var(--mono);padding:5px 7px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--text-2)}
+.mo-keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.mo-k{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px 10px;border-radius:14px;border:1px solid var(--line-2);background:var(--panel);color:var(--text);transition:.12s;position:relative}
+.mo-k b{font:700 26px/1 var(--mono)}
+.mo-k span{font:600 12px var(--sans);color:var(--text-2)}
+.mo-k kbd{position:absolute;top:7px;right:8px;font:600 9px var(--mono);color:var(--faint)}
+.mo-k:hover{background:var(--panel-2);transform:translateY(-1px)}
+.mo-k:active,.mo-k.press{transform:scale(.96);background:rgba(34,211,238,.14);border-color:var(--accent-2)}
+.mo-k.ok b{color:var(--ok)}
+.mo-log{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;min-height:26px}
+.mo-log i{font:600 11px/1 var(--mono);font-style:normal;padding:5px 7px;border-radius:6px;background:var(--panel-2);color:var(--text-2)}
+.mo-log i.bs{color:var(--danger)}
+.mo-pick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mo-pick .field{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--muted)}
+.mo-pick select{width:100%}
+.mo-status{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-size:12px;color:var(--text-2)}
+.mo-status .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mo-sec{font:700 10px/1 var(--mono);letter-spacing:1px;color:var(--faint);text-transform:uppercase;margin:16px 0 9px}
+.mo-sec:first-child{margin-top:0}
+.mo-tab{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.mo-cell{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);text-align:left;transition:.12s}
+.mo-cell b{font:700 17px/1 var(--mono);min-width:16px;text-align:center}
+.mo-cell:hover{background:var(--panel-2);border-color:var(--line-2)}
+.mo-cell.hit{border-color:rgba(34,211,238,.5);background:rgba(34,211,238,.08)}
+.mo-cell.exact{border-color:var(--ok);background:rgba(61,220,151,.14)}
+.mo-g{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+.mo-g i{display:block;height:5px;border-radius:3px;background:var(--text-2);opacity:.85}
+.mo-g i.d{width:5px;border-radius:50%}
+.mo-g i.h{width:14px}
+@media(max-width:980px){.mo-grid{grid-template-columns:1fr}.mo-pick{grid-template-columns:1fr 1fr}.mo-state{grid-template-columns:1fr 1fr}.mo-next{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -750,6 +795,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
     <nav class="nav" id="nav">
       <button data-view="keymap" class="on" title="Bàn phím"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M10 13h4"/></svg><span>Bàn phím</span></button>
       <button data-view="macro" title="Macro"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg><span>Macro</span></button>
+      <button data-view="morse" title="Morse"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8"/><path d="M10 12h4M18 12h1"/><circle cx="21" cy="12" r="1.2"/></svg><span>Morse</span></button>
       <button data-view="adv" title="Nâng cao"><svg viewBox="0 0 24 24"><path d="M4 6h9M18 6h2M4 12h2M11 12h9M4 18h9M18 18h2"/><circle cx="15" cy="6" r="2.2"/><circle cx="8" cy="12" r="2.2"/><circle cx="15" cy="18" r="2.2"/></svg><span>Nâng cao</span></button>
       <button data-view="led" title="Đèn LED"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span>Đèn LED</span></button>
       <button data-view="conn" title="Kết nối"><svg viewBox="0 0 24 24"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0zM12 16v5"/></svg><span>Kết nối</span></button>
@@ -782,6 +828,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
           <div class="layerbar-top">
             <div class="layers" id="layers"></div>
             <div class="layer-actions">
+              <button class="btn sm" id="renLayer" title="Hoặc bấm đúp vào tên layer">Đổi tên</button>
               <button class="btn sm" id="addLayer">+ Layer</button>
               <button class="btn sm" id="dupLayer">Nhân bản</button>
               <button class="btn sm danger" id="delLayer">Xoá layer cuối</button>
@@ -811,6 +858,47 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
         </div>
         <div class="hint-card"><b>Macro</b> là chuỗi thao tác, mỗi dòng một bước: <span class="kbd">tap KEY</span> <span class="kbd">down KEY</span> <span class="kbd">up KEY</span> <span class="kbd">wait MS</span> <span class="kbd">type văn bản ASCII</span>. Ví dụ phím: <span class="kbd">A</span> <span class="kbd">Enter</span> <span class="kbd">LCtrl</span> <span class="kbd">S+A</span> (Shift+A) <span class="kbd">0x04</span>. Để dùng, vào tab <b>Bàn phím</b>, chọn một phím rồi chọn danh mục <b>Macro</b>. Bấm <b>Lưu vào bàn phím</b> để ghi macro.</div>
       </section>
+      <section class="view" id="view-morse">
+        <div class="mo-grid">
+          <div class="mo-col">
+            <div class="card"><div class="card-hd"><h2>Ô thử</h2><span class="sub">chạy đúng thuật toán của firmware</span></div><div class="card-bd">
+              <div class="mo-screen" id="moScreen" tabindex="0" aria-label="Màn hình máy tính giả lập, bấm 1 chấm, 2 gạch, 3 xong"><span id="moText"></span><i class="mo-caret"></i><em id="moPh">Bấm vào đây rồi gõ 1 · 2 · 3, hoặc dùng 3 nút bên dưới…</em></div>
+              <div class="mo-state">
+                <div><small>Mã đang gõ</small><b class="mo-code" id="moCode">—</b></div>
+                <div><small>Đang hiện</small><b class="mo-shown" id="moShown">—</b></div>
+                <div class="mo-next"><small>Gõ tiếp được</small><div id="moNext"></div></div>
+              </div>
+              <div class="mo-keys">
+                <button type="button" class="mo-k" id="moDot"><b>•</b><span>Chấm</span><kbd>1</kbd></button>
+                <button type="button" class="mo-k" id="moDash"><b>—</b><span>Gạch</span><kbd>2</kbd></button>
+                <button type="button" class="mo-k ok" id="moOk"><b>✓</b><span>Xong</span><kbd>3</kbd></button>
+              </div>
+              <div class="tool-actions" style="margin-top:12px"><button class="btn sm" id="moSpace">Space</button><button class="btn sm" id="moBs">⌫ Backspace</button><button class="btn sm" id="moEnter">Enter</button><button class="btn sm" id="moCaps">Caps Lock</button><button class="btn sm danger" id="moClear">Xoá hết</button></div>
+              <div class="mo-log" id="moLog" aria-label="Các phím gửi sang máy tính"></div>
+              <p class="hint">Dòng dưới cùng là những gì bàn phím gửi sang máy tính: <b>⌫</b> là Backspace xoá ký tự tạm trước khi hiện ký tự mới. Phím Space / Backspace / Enter cũng chốt ký tự đang gõ, giống firmware.</p>
+            </div></div>
+            <div class="card"><div class="card-hd"><h2>Thử bằng bàn phím thật</h2><span class="sub">cần firmware v12 · layer Morse</span></div><div class="card-bd">
+              <textarea class="mac-in mac-ta" id="moReal" rows="3" style="min-height:0;height:84px" spellcheck="false" placeholder="Chuyển bàn phím sang layer Morse (bấm nút layer nhỏ 3 lần) rồi gõ vào đây…"></textarea>
+            </div></div>
+            <div class="card"><div class="card-hd"><h2>Gán phím</h2><span class="sub" id="moAssignSub"></span></div><div class="card-bd">
+              <div id="moStatus"></div>
+              <div class="mo-pick">
+                <label class="field"><span>Layer</span><select class="mac-in" id="moLayer"></select></label>
+                <label class="field"><span>Chấm</span><select class="mac-in" id="moPD"></select></label>
+                <label class="field"><span>Gạch</span><select class="mac-in" id="moPH"></select></label>
+                <label class="field"><span>Xong</span><select class="mac-in" id="moPO"></select></label>
+              </div>
+              <div class="tool-actions" style="margin-top:12px"><button class="btn primary" id="moApply3">Gán 3 phím này</button><button class="btn" id="moApplyFull">Bố cục Morse đầy đủ → Layer 3</button></div>
+              <p class="hint">«Gán 3 phím này» chỉ đổi 3 vị trí đã chọn trong layer đã chọn. «Bố cục đầy đủ» ghi đè cả layer 3: <span class="kbd">1</span> chấm, <span class="kbd">2</span> gạch, <span class="kbd">3</span> xong, <span class="kbd">0</span> Space, <span class="kbd">+</span> Backspace, <span class="kbd">Enter</span>, <span class="kbd">/</span> Caps Lock, <span class="kbd">*</span> giữ Shift, <span class="kbd">ESC</span> về layer 0. Xong nhớ bấm «Lưu vào bàn phím».</p>
+              <p class="hint"><b>Gán vào phím bất kỳ, layer bất kỳ:</b> tab Bàn phím → chọn phím → nhóm <b>Morse</b> (Chấm / Gạch / Xong). Ba phím có thể nằm ở các layer khác nhau, và cũng đặt được trong Tap dance (bấm / giữ / bấm 2 lần) hoặc kết quả Combo (firmware v13).</p>
+            </div></div>
+          </div>
+          <div class="mo-col">
+            <div class="card"><div class="card-hd"><h2>Bảng mã</h2><span class="sub">bấm một ô để gõ thử</span></div><div class="card-bd" id="moTable"></div></div>
+          </div>
+        </div>
+        <div class="hint-card"><b>Cách gõ:</b> mỗi lần bấm <b>Chấm</b> hoặc <b>Gạch</b>, ký tự tương ứng hiện ngay trên máy tính. Bấm thêm thì ký tự cũ bị xoá (Backspace) và thay bằng ký tự của mã dài hơn — ví dụ <span class="kbd">•</span> → <b>e</b>, <span class="kbd">• •</span> → <b>i</b>, <span class="kbd">• • —</span> → <b>u</b>. Mã chưa có ký tự nào (vd <span class="kbd">• • — —</span>) thì chỉ xoá, gõ tiếp là ra <b>?</b>. Bấm <b>Xong</b> để chốt ký tự và bắt đầu ký tự mới. Chữ in hoa: dùng Caps Lock hoặc giữ Shift (phím <span class="kbd">*</span>). Mã tối đa 7 nét.</div>
+      </section>
       <section class="view" id="view-adv">
         <div class="adv-grid">
           <div class="card"><div class="card-hd"><h2>Tap Dance</h2><span class="sub">Bấm · Giữ · Bấm 2 lần</span></div><div class="card-bd" id="tdList"></div></div>
@@ -825,6 +913,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
           <div class="led-stage"><div class="led-board" id="ledBoard" style="grid-template-columns:repeat(6,1fr);max-width:300px"></div></div>
         </div>
         <div class="card" style="margin-top:18px"><div class="card-hd"><h2>Hiệu ứng dây đèn</h2><span class="sub">chọn rồi bấm «Lưu vào bàn phím»</span></div><div class="card-bd"><div class="fx-grid" id="fxGrid"></div></div></div>
+        <div class="hint-card" style="margin:18px 0 0"><b>Gán chế độ đèn vào phím bất kỳ:</b> tab <b>Bàn phím</b> → chọn một phím ở layer bất kỳ → nhóm <b>Đèn LED</b>: <span class="kbd">LED 1</span> … <span class="kbd">LED 16</span> chọn thẳng chế độ, <span class="kbd">LED +</span> / <span class="kbd">LED −</span> đổi tiếp / lùi. Cũng dùng được trong Tap dance và kết quả Combo. Chế độ đổi bằng phím được nhớ sau khi tắt nguồn (firmware v13).</div>
         <div class="led-controls" style="grid-template-columns:1fr 1fr">
           <div class="card"><div class="card-hd"><h2>Tinh chỉnh</h2></div><div class="card-bd">
             <div class="slider-row"><label for="ledTick">Tốc độ</label><input type="range" id="ledTick" min="20" max="2000" step="10"><output id="ledTickV">—</output></div>
@@ -889,7 +978,62 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
 const L = 16, NK = 22, BASE_TD = L * NK, BASE_CB = BASE_TD + 12, NLI = BASE_CB + 12, LDB = NLI + 1, NLD = 4, NW = LDB + NLD;
 const KC_TRNS = 1;
 const CONS = x => 0x8000 | x, MO = n => 0x4000 | n, TLK = n => 0x4100 | n, LYN = 0x4200, TDK = n => 0x5000 | n, NKK = i => 0x6000 | i;
+// <morse-engine>
+// Thuật toán gõ Morse — PHẢI giống firmware (morse.h). test/run_tests.sh nạp đúng đoạn này và so với bản C trên chuỗi sự kiện ngẫu nhiên.
+const MORSE_MAX = 7;
+const MORSE_TAB = [   // [ký tự, mã] — cùng thứ tự với MORSE_TAB trong morse.h
+  ["a", ".-"], ["b", "-..."], ["c", "-.-."], ["d", "-.."], ["e", "."], ["f", "..-."], ["g", "--."], ["h", "...."], ["i", ".."],
+  ["j", ".---"], ["k", "-.-"], ["l", ".-.."], ["m", "--"], ["n", "-."], ["o", "---"], ["p", ".--."], ["q", "--.-"], ["r", ".-."],
+  ["s", "..."], ["t", "-"], ["u", "..-"], ["v", "...-"], ["w", ".--"], ["x", "-..-"], ["y", "-.--"], ["z", "--.."], ["0", "-----"],
+  ["1", ".----"], ["2", "..---"], ["3", "...--"], ["4", "....-"], ["5", "....."], ["6", "-...."], ["7", "--..."], ["8", "---.."], ["9", "----."],
+  [".", ".-.-.-"], [",", "--..--"], ["?", "..--.."], ["'", ".----."], ["!", "-.-.--"], ["/", "-..-."], ["(", "-.--."], [")", "-.--.-"], ["&", ".-..."],
+  [":", "---..."], [";", "-.-.-."], ["=", "-...-"], ["+", ".-.-."], ["-", "-....-"], ["_", "..--.-"], ["\"", ".-..-."], ["$", "...-..-"], ["@", ".--.-."]
+];
+const KC_MORSE = { dot: 0x7060, dash: 0x7061, ok: 0x7062 };
+// Bố cục layer 3 mặc định (giống n3[] trong numpad21.ino): ESC = về L0, / = Caps, * = giữ Shift, + = Backspace, 1/2/3 = chấm/gạch/xong, Enter, 0 = Space
+const MORSE_LAYOUT = [TLK(0), 0, 0, KC_TRNS, 0, 0x39, 0x7003, 0, 0, 0, 0, 0, 0, 0, 0x2A, KC_MORSE.dot, KC_MORSE.dash, KC_MORSE.ok, 0x28, 0x2C, 0, LYN];
+const morseFind = code => { for (const t of MORSE_TAB) if (t[1] === code) return t[0]; return ''; };
+const morseNew = () => ({ code: '', shown: false });
+const morseCommit = m => { m.code = ''; m.shown = false; };
+// io = { room(), bs(), put(ch) }. Trả 1 nếu nhận, 0 nếu bỏ qua (mã đã dài 7 hoặc hàng đợi phím hết chỗ) — khi bỏ qua trạng thái không đổi.
+function morsePress(m, dash, io) {
+  if (m.code.length >= MORSE_MAX) return 0;
+  const nc = m.code + (dash ? '-' : '.'), ch = morseFind(nc), need = (m.shown ? 1 : 0) + (ch ? 1 : 0);
+  if (io.room() < need) return 0;
+  if (m.shown) io.bs();
+  if (ch) io.put(ch);
+  m.code = nc; m.shown = !!ch; return 1;
+}
+// </morse-engine>
+// <led-engine>
+// Bản JS của led_frame() trong firmware (6 đèn). test/cross_check.js so từng khung hình với bản C (trừ 2 chế độ ngẫu nhiên 8 và 16).
+const NLED = 6;
+function ledFrame(mode, t) {
+  const M = 63, burst = [0x0C, 0x1E, 0x3F, 0x33, 0x21, 0, 0, 0], pulse = [0x3F, 0, 0x3F, 0, 0, 0, 0, 0], implode = [0x21, 0x33, 0x3F, 0x1E, 0x0C, 0, 0, 0]; let p;
+  switch (mode) {
+    case 1: return 0;
+    case 2: return M;
+    case 3: return 1 << (t % NLED);
+    case 4: p = t % (2 * NLED - 2); return 1 << (p < NLED ? p : (2 * NLED - 2) - p);
+    case 5: return (t % 10) < 5 ? M : 0;
+    case 6: return (t % 10) < 5 ? 0x15 : 0x2A;
+    case 7: p = t % (2 * NLED); return p < NLED ? ((1 << (p + 1)) - 1) : ((M << (p - NLED + 1)) & M);
+    case 8: return Math.floor(Math.random() * 64);
+    case 9: return burst[t % 8];
+    case 10: return 3 << (t % (NLED - 1));
+    case 11: return t % (M + 1);
+    case 12: return pulse[t % 8];
+    case 13: return 1 << (NLED - 1 - t % NLED);
+    case 14: return implode[t % 8];
+    case 15: return (t % 10) < 5 ? 0x07 : 0x38;
+    case 16: return 1 << Math.floor(Math.random() * NLED);
+  }
+  return M;
+}
+// </led-engine>
 const $ = s => document.querySelector(s);
+
+const FX = [['Tắt hết', 'Không sáng đèn nào.', '#2a3140,#2a3140'], ['Sáng hết', 'Cả 6 đèn sáng liên tục.', '#7c5cff,#22d3ee'], ['Chạy đuổi', 'Một đèn chạy dọc dây.', '#22d3ee,#3ddc97'], ['Qua lại', 'Đèn chạy qua rồi quay lại.', '#7c5cff,#ff8fb1'], ['Nhấp nháy', 'Cả dây nhấp nháy.', '#ffb86b,#ff5d7a'], ['Xen kẽ', 'Đèn chẵn và lẻ đổi phiên.', '#b6ff3b,#22d3ee'], ['Dâng rồi tắt dần', 'Sáng dần từng đèn rồi tắt dần.', '#22d3ee,#7c5cff'], ['Lấp lánh', 'Các đèn nháy ngẫu nhiên.', '#ff8fb1,#ffb86b'], ['Nổ từ giữa', 'Lan từ giữa ra hai đầu.', '#ff5d7a,#ffb86b'], ['Hai đèn chạy đuổi', 'Một cặp đèn chạy dọc dây.', '#22d3ee,#7c5cff'], ['Đếm nhị phân', '6 đèn đếm từ 0 đến 63.', '#b6ff3b,#3ddc97'], ['Nhịp tim', 'Chớp đôi rồi nghỉ.', '#ff5d7a,#ff8fb1'], ['Chạy ngược', 'Một đèn chạy theo chiều ngược lại.', '#3ddc97,#22d3ee'], ['Co vào giữa', 'Sáng từ hai đầu thu vào giữa.', '#ffb86b,#7c5cff'], ['Hai nửa đổi phiên', 'Nửa trái và nửa phải thay nhau.', '#ff8fb1,#22d3ee'], ['Chớp ngẫu nhiên', 'Mỗi lần chớp một đèn bất kỳ.', '#b6ff3b,#ffb86b']];
 
 // ===== danh mục phím =====
 const CAT = []; // {c, n (tên dùng trong macro), l (nhãn hiển thị), g (nhóm)}
@@ -919,7 +1063,9 @@ add(0x7001, 'Latch', 'Đặc biệt'); add(0x7002, 'TgSpace', 'Đặc biệt', '
 for (let i = 0; i < 32; i++) add(0x7100 + i, 'M' + (i + 1), 'Macro', 'Macro ' + (i + 1));
 add(0x7030, 'OutTog', 'Kết nối', 'USB⇄BLE'); add(0x7031, 'OutUSB', 'Kết nối', 'Dùng USB'); add(0x7032, 'OutBLE', 'Kết nối', 'Dùng BLE'); add(0x7033, 'BtClr', 'Kết nối', 'Xóa ghép đôi');
 for (let i = 0; i < 5; i++) add(0x7040 + i, 'BT' + (i + 1), 'Kết nối', 'BT ' + (i + 1));
-add(0x7010, 'LedNext', 'Kết nối', 'LED +'); add(0x7011, 'LedPrev', 'Kết nối', 'LED −'); add(0x7F00, 'Boot', 'Kết nối', 'Bootloader');
+add(0x7010, 'LedNext', 'Đèn LED', 'LED +'); add(0x7011, 'LedPrev', 'Đèn LED', 'LED −');
+FX.forEach((f, i) => add(0x7020 + i, f[0], 'Đèn LED', 'LED ' + (i + 1)));   // chọn thẳng chế độ 1..16 (firmware v13) add(0x7F00, 'Boot', 'Kết nối', 'Bootloader');
+add(0x7060, 'MorseDot', 'Morse', 'Chấm'); add(0x7061, 'MorseDash', 'Morse', 'Gạch'); add(0x7062, 'MorseOk', 'Morse', 'Xong');
 const BYCODE = new Map(CAT.map(e => [e.c, e])), BYNAME = new Map(CAT.map(e => [e.n.toLowerCase(), e.c]));
 const hex = n => '0x' + n.toString(16).toUpperCase();
 function label(c) {
@@ -979,12 +1125,29 @@ async function readAll() {
     mac.set(r.subarray(3, 3 + n), off);
     if ((off / 28) % 8 === 0) prog('Đọc macro ' + Math.round(50 + (off + n) * 50 / mac.length) + '%');
   }
+  await readNames();
   w0 = w.slice(); mac0 = mac.slice();
+}
+async function readNames() {   // lenh 8: doc ten 16 layer (firmware v13+)
+  LN = Array(L).fill('');
+  if (info && info.ver >= 13) {
+    const buf = new Uint8Array(L * LNL);
+    for (let off = 0; off < buf.length; off += 28) { const n = Math.min(28, buf.length - off), r = await xf(pkt(8, off, n)); buf.set(r.subarray(3, 3 + n), off); }
+    for (let l = 0; l < L; l++) { const sl = buf.subarray(l * LNL, (l + 1) * LNL), e = sl.indexOf(0); LN[l] = TD_.decode(e < 0 ? sl : sl.subarray(0, e)); }
+  }
+  LN0 = JSON.stringify(LN);
+}
+async function writeNames() {   // lenh 9: ghi ten 16 layer
+  const buf = new Uint8Array(L * LNL);
+  LN.forEach((nm, l) => buf.set(TE.encode(nm).subarray(0, LNMAX), l * LNL));
+  for (let off = 0; off < buf.length; off += 28) { const n = Math.min(28, buf.length - off), b = pkt(9, off, n); b.set(buf.subarray(off, off + n), 3); await xf(b); }
+  LN0 = JSON.stringify(LN);
 }
 async function writeAll() {
   let done = 0, total = 0;
   for (let off = 0; off < NW; off += 14) { const n = Math.min(14, NW - off); for (let i = 0; i < n; i++) if (w[off + i] !== w0[off + i]) { total++; break; } }
   for (let off = 0; off < mac.length; off += 28) { const n = Math.min(28, mac.length - off); for (let i = 0; i < n; i++) if (mac[off + i] !== mac0[off + i]) { total++; break; } }
+  if (info && info.ver >= 13 && JSON.stringify(LN) !== LN0) total++;
   for (let off = 0; off < NW; off += 14) {
     const n = Math.min(14, NW - off); let ch = false;
     for (let i = 0; i < n; i++) if (w[off + i] !== w0[off + i]) ch = true;
@@ -999,6 +1162,7 @@ async function writeAll() {
     const b = pkt(7, off, n); b.set(mac.subarray(off, off + n), 3);
     await xf(b); prog('Ghi ' + (++done) + '/' + total);
   }
+  if (info && info.ver >= 13 && JSON.stringify(LN) !== LN0) { await writeNames(); prog('Ghi ' + (++done) + '/' + total); }
   await xf(pkt(3, 0, 0));
   w0 = w.slice(); mac0 = mac.slice();
 }
@@ -1070,8 +1234,11 @@ function hidFromEvent(e) {
   return CODE_MAP[e.code] == null ? null : CODE_MAP[e.code];
 }
 
-let loaded = false, M = [], M0 = '', hist = [], hi = -1, view = 'keymap', capturing = false, pickerOpen = false, pkCat = 'all', pkShift = false, pickInfo = null, dlgResolve = null, dlgOpen = false, macSel = 0;
-const layerLabel = l => l === 0 ? 'BASE' : l === 6 ? 'FN' : 'LAYER ' + l;
+let LN = Array(16).fill(''), LN0 = '', loaded = false, M = [], M0 = '', hist = [], hi = -1, view = 'keymap', capturing = false, pickerOpen = false, pkCat = 'all', pkShift = false, pickInfo = null, dlgResolve = null, dlgOpen = false, macSel = 0;
+const hasMorse = l => { for (let p = 0; p < NK; p++) { const c = w[K(l, p)]; if (c >= KC_MORSE.dot && c <= KC_MORSE.ok) return true; } return false; };
+const defLabel = l => l === 0 ? 'BASE' : l === 6 ? 'FN' : hasMorse(l) ? 'MORSE' : 'LAYER ' + l;
+const layerLabel = l => LN[l] || defLabel(l);
+const LNL = 12, LNMAX = LNL - 1, TE = new TextEncoder(), TD_ = new TextDecoder();   // 12 byte/ten, byte cuoi luon la 0 -> toi da 11 byte UTF-8
 function layerColor(l) {
   const h = (l * 137) % 360, f = (h % 60) * 255 / 60, s = Math.floor(h / 60);
   const v = [[255, f, 0], [255 - f, 255, 0], [0, 255, f], [0, 255 - f, 255], [f, 0, 255], [255, 0, 255 - f]][s];
@@ -1081,7 +1248,7 @@ function catClass(c) {
   if (c === 0) return 'none'; if (c === 1) return 'trns'; if (c & 0x8000) return 'media';
   const hi_ = c & 0xFF00;
   if (hi_ === 0x4000 || hi_ === 0x4100 || hi_ === 0x4200) return 'layer';
-  if (c === 0x7010 || c === 0x7011) return 'led';
+  if (c === 0x7010 || c === 0x7011 || (c >= 0x7020 && c < 0x7030)) return 'led';
   if (c >= 0xE0 && c <= 0xE7) return 'mod';
   if (c >= 0x5000) return 'special';
   return 'std';
@@ -1117,17 +1284,17 @@ function ask(o) {
 function closeDlg(v) { if (!dlgOpen) return; dlgOpen = false; $('#dlgWrap').classList.remove('on'); document.body.classList.remove('locked'); const r = dlgResolve; dlgResolve = null; if (r) r(v); }
 
 // ----- lịch sử / trạng thái bẩn -----
-const snap = () => ({ w: w.slice(), m: JSON.stringify(M) });
+const snap = () => ({ w: w.slice(), m: JSON.stringify(M), ln: JSON.stringify(LN) });
 function resetHist() { hist = [snap()]; hi = 0; updateUndo(); }
 function commit() {
   const s = snap();
-  if (hi >= 0 && hist[hi].m === s.m && hist[hi].w.every((v, i) => v === s.w[i])) { updateUndo(); return; }
+  if (hi >= 0 && hist[hi].m === s.m && hist[hi].ln === s.ln && hist[hi].w.every((v, i) => v === s.w[i])) { updateUndo(); return; }
   hist = hist.slice(0, hi + 1); hist.push(s); if (hist.length > 80) hist.shift(); hi = hist.length - 1; updateUndo();
 }
-function restore(msg) { const s = hist[hi]; w.set(s.w); M = JSON.parse(s.m); renderAll(); toast(msg, 'ok'); }
+function restore(msg) { const s = hist[hi]; w.set(s.w); M = JSON.parse(s.m); LN = JSON.parse(s.ln); renderAll(); toast(msg, 'ok'); }
 function undo() { if (hi > 0) { hi--; restore('Đã hoàn tác'); } }
 function redo() { if (hi < hist.length - 1) { hi++; restore('Đã làm lại'); } }
-const isDirty = () => loaded && (!w.every((v, i) => v === w0[i]) || JSON.stringify(M) !== M0);
+const isDirty = () => loaded && (!w.every((v, i) => v === w0[i]) || JSON.stringify(M) !== M0 || JSON.stringify(LN) !== LN0);
 function updateDirtyUI() { const d = isDirty(); $('#dirtyPill').hidden = !d; $('#saveBtn').classList.toggle('dirty', d); }
 function updateUndo() { $('#undoBtn').disabled = hi <= 0; $('#redoBtn').disabled = hi >= hist.length - 1; }
 function changed() { commit(); renderAll(); }
@@ -1138,10 +1305,10 @@ function renderLayers() {
   for (let l = 0; l < n; l++) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'layer-chip' + (l === layer ? ' on' : ''); b.style.setProperty('--c', layerColor(l));
     b.innerHTML = '<span class="lc-dot"></span><span>' + esc(layerLabel(l)) + '</span><span class="lc-n">L' + l + '</span>';
-    b.onclick = () => { layer = l; sel = -1; renderAll(); }; wrap.append(b);
+    b.onclick = () => { layer = l; sel = -1; renderAll(); }; b.ondblclick = () => renameLayer(l); b.title = 'Bấm đúp để đổi tên'; wrap.append(b);
   }
   $('#layerCount').textContent = n + ' / ' + L + ' layer';
-  $('#addLayer').disabled = $('#dupLayer').disabled = !loaded || n >= L; $('#delLayer').disabled = !loaded || n <= 1;
+  $('#renLayer').disabled = !loaded; $('#addLayer').disabled = $('#dupLayer').disabled = !loaded || n >= L; $('#delLayer').disabled = !loaded || n <= 1;
   $('#devFoot2').textContent = n + ' layer';
 }
 function renderDevice() {
@@ -1216,14 +1383,127 @@ function assign(code) {
 }
 
 // ----- layer -----
+async function renameLayer(l) {
+  if (!loaded) { toast('Hãy kết nối bàn phím trước.', 'warn'); return; }
+  if (info && info.ver < 13) { toast('Firmware v' + info.ver + ' chưa lưu được tên layer — hãy nạp firmware v13.', 'warn', 5000); return; }
+  const v = await ask({ title: 'Đổi tên layer ' + l, msg: 'Tối đa ' + LNMAX + ' byte (≈ ' + LNMAX + ' chữ không dấu, hoặc ít hơn nếu có dấu). Để trống = tên mặc định (' + defLabel(l) + ').', input: true, value: LN[l], placeholder: defLabel(l), ok: 'Đổi tên' });
+  if (v === false) return;
+  const name = String(v).replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  if (TE.encode(name).length > LNMAX) { toast('Tên quá dài (' + TE.encode(name).length + '/' + LNMAX + ' byte). Rút gọn rồi thử lại.', 'warn', 4500); return; }
+  LN[l] = name; changed(); toast(name ? 'Đã đặt tên layer ' + l + ': ' + name : 'Đã về tên mặc định', 'ok');
+}
 function bindLayers() {
-  $('#addLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = KC_TRNS; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
-  $('#dupLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = w[K(layer, i)]; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
+  $('#renLayer').onclick = () => renameLayer(layer);
+  $('#addLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = KC_TRNS; LN[nl()] = ''; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
+  $('#dupLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = w[K(layer, i)]; LN[nl()] = ''; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
   $('#delLayer').onclick = async () => {
     if (nl() <= 1) return;
     if (!await ask({ title: 'Xoá layer cuối?', msg: 'Layer ' + (nl() - 1) + ' sẽ bị bỏ khỏi cấu hình.', ok: 'Xoá', danger: true })) return;
-    w[NLI] = nl() - 1; if (layer >= nl()) layer = nl() - 1; sel = -1; changed();
+    LN[nl() - 1] = ''; w[NLI] = nl() - 1; if (layer >= nl()) layer = nl() - 1; sel = -1; changed();
   };
+}
+
+
+// ----- Morse -----
+const MO_GROUPS = [['Chữ cái', c => /[a-z]/.test(c)], ['Chữ số', c => /[0-9]/.test(c)], ['Dấu câu', c => !/[a-z0-9]/.test(c)]];
+const mo = { m: morseNew(), text: '', caps: false, log: [] };
+const moIO = {
+  room: () => 99,
+  bs() { mo.text = mo.text.slice(0, -1); mo.log.push('⌫'); },
+  put(ch) { mo.text += mo.caps && /[a-z]/.test(ch) ? ch.toUpperCase() : ch; mo.log.push(ch); }
+};
+const glyph = code => '<span class="mo-g">' + [...code].map(c => '<i class="' + (c === '.' ? 'd' : 'h') + '"></i>').join('') + '</span>';
+function moEvent(ev) {
+  if (ev === 'dot' || ev === 'dash') moPressOne(ev === 'dash');
+  else if (ev === 'ok') morseCommit(mo.m);
+  else if (ev === 'space') { morseCommit(mo.m); mo.text += ' '; mo.log.push('␣'); }
+  else if (ev === 'enter') { morseCommit(mo.m); mo.text += '\n'; mo.log.push('↵'); }
+  else if (ev === 'bs') { morseCommit(mo.m); mo.text = mo.text.slice(0, -1); mo.log.push('⌫'); }
+  else if (ev === 'clear') { morseCommit(mo.m); mo.text = ''; mo.log = []; }
+  if (mo.log.length > 16) mo.log = mo.log.slice(-16);
+  renderMorseSim();
+}
+function moPressOne(dash) { morsePress(mo.m, dash, moIO); }
+function renderMorseSim() {
+  const code = mo.m.code, cur = mo.m.shown ? morseFind(code) : '';
+  $('#moText').textContent = mo.text; $('#moScreen').classList.toggle('has', !!mo.text || !!code);
+  $('#moCode').innerHTML = code ? esc([...code].map(c => c === '.' ? '•' : '—').join(' ')) : '—';
+  $('#moShown').textContent = cur || (code ? '∅' : '—');
+  const nx = [];
+  if (code.length < MORSE_MAX) for (const x of ['.', '-']) {
+    const nc = code + x, ch = morseFind(nc), more = MORSE_TAB.some(t => t[1].length > nc.length && t[1].startsWith(nc));
+    if (ch || more) nx.push('<span class="mo-chip">' + (x === '.' ? '•' : '—') + ' → ' + (ch ? esc(ch) : '…') + (ch && more ? ' …' : '') + '</span>');
+  }
+  $('#moNext').innerHTML = nx.join('') || '<span class="hint" style="margin:0">bấm Xong để chốt</span>';
+  $('#moLog').innerHTML = mo.log.map(c => '<i class="' + (c === '⌫' ? 'bs' : '') + '">' + esc(c) + '</i>').join('');
+  $('#moCaps').classList.toggle('active', mo.caps);
+  $$('#moTable .mo-cell').forEach(b => { const c = b.dataset.code; b.classList.toggle('hit', !!code && c.startsWith(code)); b.classList.toggle('exact', !!code && c === code); });
+}
+function renderMorseTable() {
+  $('#moTable').innerHTML = MO_GROUPS.map(g => '<div class="mo-sec">' + g[0] + '</div><div class="mo-tab">' + MORSE_TAB.filter(t => g[1](t[0])).map(t => '<button type="button" class="mo-cell" data-code="' + t[1] + '" title="' + esc(t[1].replace(/\./g, '•').replace(/-/g, '—')) + '"><b>' + esc(t[0]) + '</b>' + glyph(t[1]) + '</button>').join('') + '</div>').join('');
+}
+function moTypeCode(code) { morseCommit(mo.m); for (const c of code) moPressOne(c === '-'); renderMorseSim(); }
+function morseAssignInfo() {   // layer nào đang có phím Morse, đủ 3 phím chưa
+  const out = []; if (!loaded) return out;
+  for (let l = 0; l < nl(); l++) {
+    const f = { dot: [], dash: [], ok: [] };
+    for (let p = 0; p < NK; p++) { const c = w[K(l, p)]; for (const k in f) if (c === KC_MORSE[k]) f[k].push(p); }
+    if (f.dot.length + f.dash.length + f.ok.length) out.push({ l, f, full: f.dot.length && f.dash.length && f.ok.length });
+  }
+  return out;
+}
+function renderMorse() {
+  const st = $('#moStatus'), info_ = morseAssignInfo();
+  const nm = a => a.length ? a.map(p => PNAME[p]).join(', ') : '<b style="color:var(--danger)">thiếu</b>';
+  let h = '';
+  if (!loaded) h = '<div class="row"><span class="pill-s">Chưa kết nối</span>Kết nối bàn phím (USB) để gán phím. Ô thử và bảng mã dùng được ngay.</div>';
+  else {
+    if (info && info.ver < 12) h += '<div class="row"><span class="pill-s warn">Firmware v' + info.ver + '</span>chưa có chế độ Morse — hãy nạp firmware v12 trở lên.</div>';
+    h += info_.length ? info_.map(x => '<div class="row"><span class="pill-s ' + (x.full ? 'ok' : 'warn') + '">Layer ' + x.l + '</span>Chấm: ' + nm(x.f.dot) + ' · Gạch: ' + nm(x.f.dash) + ' · Xong: ' + nm(x.f.ok) + '</div>').join('') : '<div class="row"><span class="pill-s warn">Chưa gán</span>Chưa có layer nào dùng phím Morse. Bấm «Bố cục Morse đầy đủ» hoặc chọn 3 phím rồi «Gán».</div>';
+  }
+  st.className = 'mo-status'; st.innerHTML = h;
+  $('#moAssignSub').textContent = loaded ? (info_.some(x => x.full) ? 'đã gán' : 'chưa gán') : '';
+  const keep = { l: $('#moLayer').value, d: $('#moPD').value, h: $('#moPH').value, o: $('#moPO').value };
+  const lo = []; for (let l = 0; l < nl(); l++) lo.push('<option value="' + l + '">Layer ' + l + ' · ' + esc(layerLabel(l)) + '</option>');
+  if (nl() < L) lo.push('<option value="new">+ Layer mới (' + nl() + ')</option>');
+  $('#moLayer').innerHTML = lo.join('');
+  const po = i => PNAME.map((n, p) => '<option value="' + p + '"' + (p === i ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
+  $('#moPD').innerHTML = po(15); $('#moPH').innerHTML = po(16); $('#moPO').innerHTML = po(17);
+  const pref = info_.find(x => x.full), want = keep.l !== '' && [...$('#moLayer').options].some(o => o.value === keep.l) ? keep.l : pref ? String(pref.l) : (nl() > 3 ? '3' : 'new');
+  if ([...$('#moLayer').options].some(o => o.value === want)) $('#moLayer').value = want;
+  if (keep.d !== '') { $('#moPD').value = keep.d; $('#moPH').value = keep.h; $('#moPO').value = keep.o; }
+  else if (pref) { $('#moPD').value = pref.f.dot[0]; $('#moPH').value = pref.f.dash[0]; $('#moPO').value = pref.f.ok[0]; }
+  $('#moApply3').disabled = $('#moApplyFull').disabled = !loaded;
+}
+function moEnsureLayers(n) { while (nl() < n) { for (let i = 0; i < NK; i++) w[K(nl(), i)] = KC_TRNS; LN[nl()] = ''; w[NLI] = nl() + 1; } }
+function moApply3() {
+  const v = $('#moLayer').value, d = +$('#moPD').value, h = +$('#moPH').value, o = +$('#moPO').value;
+  if (new Set([d, h, o]).size < 3) { toast('Ba phím phải khác nhau', 'warn'); return; }
+  let l; if (v === 'new') { moEnsureLayers(nl() + 1); l = nl() - 1; } else l = +v;
+  for (let p = 0; p < NK; p++) { const c = w[K(l, p)]; if (c >= KC_MORSE.dot && c <= KC_MORSE.ok) w[K(l, p)] = 0; }
+  w[K(l, d)] = KC_MORSE.dot; w[K(l, h)] = KC_MORSE.dash; w[K(l, o)] = KC_MORSE.ok;
+  changed(); toast('Đã gán Chấm/Gạch/Xong vào layer ' + l + (l > 5 ? ' — lưu ý: nút layer nhỏ chỉ chuyển vòng layer 0..5, hãy gán thêm phím TG ' + l : ''), 'ok', 4500);
+}
+async function moApplyFull() {
+  if (!await ask({ title: 'Ghi bố cục Morse vào Layer 3?', msg: 'Toàn bộ 22 phím của layer 3 sẽ bị thay bằng bố cục Morse mặc định.', ok: 'Ghi đè' })) return;
+  moEnsureLayers(4); for (let i = 0; i < NK; i++) w[K(3, i)] = MORSE_LAYOUT[i];
+  changed(); toast('Đã ghi layer 3 = Morse. Nhớ bấm «Lưu vào bàn phím»', 'ok');
+}
+function bindMorse() {
+  renderMorseTable(); renderMorseSim();
+  const press = (id, ev) => { const b = $(id); b.onclick = () => { moEvent(ev); $('#moScreen').focus(); }; };
+  press('#moDot', 'dot'); press('#moDash', 'dash'); press('#moOk', 'ok'); press('#moSpace', 'space'); press('#moBs', 'bs'); press('#moEnter', 'enter'); press('#moClear', 'clear');
+  $('#moCaps').onclick = () => { mo.caps = !mo.caps; renderMorseSim(); };
+  $('#moTable').onclick = e => { const b = e.target.closest('.mo-cell'); if (b) moTypeCode(b.dataset.code); };
+  const map = { '1': 'dot', '.': 'dot', '2': 'dash', '-': 'dash', '3': 'ok', ' ': 'space', Enter: 'enter', Backspace: 'bs' };
+  $('#moScreen').addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const ev = map[e.key]; if (!ev) return; e.preventDefault();
+    const b = { dot: '#moDot', dash: '#moDash', ok: '#moOk' }[ev];
+    if (b) { $(b).classList.add('press'); setTimeout(() => $(b).classList.remove('press'), 110); }
+    moEvent(ev);
+  });
+  $('#moApply3').onclick = moApply3; $('#moApplyFull').onclick = moApplyFull;
 }
 
 // ----- tap dance / combo -----
@@ -1279,13 +1559,20 @@ function bindMacro() {
 function collectMac() { M.forEach((m, i) => mac.set(macEncode(i, m), i * MSLOT)); }
 
 // ----- LED -----
-const FX = [['Tắt hết', 'Không sáng đèn nào.', '#2a3140,#2a3140'], ['Sáng hết', 'Cả 6 đèn sáng liên tục.', '#7c5cff,#22d3ee'], ['Chạy đuổi', 'Một đèn chạy dọc dây.', '#22d3ee,#3ddc97'], ['Qua lại', 'Đèn chạy qua rồi quay lại.', '#7c5cff,#ff8fb1'], ['Nhấp nháy', 'Cả dây nhấp nháy.', '#ffb86b,#ff5d7a'], ['Xen kẽ', 'Đèn chẵn và lẻ đổi phiên.', '#b6ff3b,#22d3ee'], ['Dâng rồi tắt dần', 'Sáng dần từng đèn rồi tắt dần.', '#22d3ee,#7c5cff'], ['Lấp lánh', 'Các đèn nháy ngẫu nhiên.', '#ff8fb1,#ffb86b'], ['Nổ từ giữa', 'Lan từ giữa ra hai đầu.', '#ff5d7a,#ffb86b']];
+let ledTimer = 0, ledTk = 0;
+function ledStep(reset) {   // xem trước: chạy đúng thuật toán của firmware
+  if (reset === true) ledTk = 0;
+  const f = ledFrame(clamp(w[LDB] || 2, 1, FX.length), ledTk++);
+  $$('#ledBoard .led-dot').forEach((d, i) => d.classList.toggle('on', !!(f >> i & 1)));
+}
 function renderLed() {
   const mode = clamp(w[LDB] || 2, 1, FX.length);
   $('#fxGrid').innerHTML = FX.map((f, i) => '<button type="button" class="fx-card ' + (i + 1 === mode ? 'on' : '') + '" data-m="' + (i + 1) + '"><span class="fx-swatch" style="--sw:linear-gradient(135deg,' + f[2] + ')"></span><span class="fx-txt"><b>' + (i + 1) + ' · ' + f[0] + '</b><small>' + f[1] + '</small></span><span class="fx-check">✓</span></button>').join('');
   $('#ledFxName').textContent = FX[mode - 1][0]; $('#ledFxDesc').textContent = FX[mode - 1][1]; $('#ledModeBadge').textContent = 'MODE ' + mode;
-  $('#ledBoard').innerHTML = [0, 1, 2, 3, 4, 5].map(i => '<div class="led-dot' + (mode > 1 && (mode !== 3 || i === 0) ? ' on' : '') + '"></div>').join('');
+  $('#ledBoard').innerHTML = [0, 1, 2, 3, 4, 5].map(() => '<div class="led-dot"></div>').join('');
   const t = clamp(w[LDB + 1] || 100, 20, 2000); $('#ledTick').value = t; $('#ledTickV').textContent = t + ' ms';
+  clearInterval(ledTimer); ledTimer = 0; ledStep(true);
+  if (view === 'led') ledTimer = setInterval(ledStep, t);
   $('#ledBat').classList.toggle('on', !!w[LDB + 2]); $('#ledInd').classList.toggle('on', !!w[LDB + 3]);
 }
 function bindLed() {
@@ -1325,7 +1612,7 @@ function updateConnUI() {
 async function openDevice(d) {
   dev = d; if (!dev.opened) await dev.open(); dev.addEventListener('inputreport', onrep);
   await getInfo();
-  if (info.ver < 11 || info.L !== L || info.nk !== NK || info.NW !== NW) throw new Error('Firmware không khớp — cần firmware v11 (16 layer, 32 macro). Đang là: ver ' + info.ver + ', L ' + info.L + ', NK ' + info.nk + ', NW ' + info.NW + ')');
+  if (info.ver < 11 || info.L !== L || info.nk !== NK || info.NW !== NW) throw new Error('Firmware không khớp — cần firmware v11 trở lên (16 layer, 32 macro; Morse cần v12). Đang là: ver ' + info.ver + ', L ' + info.L + ', NK ' + info.nk + ', NW ' + info.NW + ')');
   MSLOT = info.mslot; NMAC = info.nmac; await readAll();
   M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); M0 = JSON.stringify(M);
   layer = 0; sel = -1; macSel = 0; loaded = true; resetHist(); progDone(); renderAll();
@@ -1355,7 +1642,7 @@ async function defaultsDevice() {
 }
 function exportProfile() {
   try { collectMac(); } catch (e) { toast(e.message, 'err'); return; }
-  const o = { fw: 'numpad21', w: Array.from(w), mac: btoa(String.fromCharCode(...mac)) };
+  const o = { fw: 'numpad21', ln: LN.slice(), w: Array.from(w), mac: btoa(String.fromCharCode(...mac)) };
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(o)], { type: 'application/json' })); a.download = 'numpad21-config.json'; a.click();
 }
 async function importProfile(file) {
@@ -1364,20 +1651,21 @@ async function importProfile(file) {
     if (o.fw !== 'numpad21' || o.w.length !== NW) throw new Error('File không đúng định dạng numpad21');
     const raw = atob(o.mac), m = new Uint8Array(raw.length); for (let i = 0; i < raw.length; i++) m[i] = raw.charCodeAt(i);
     if (m.length !== mac.length) throw new Error('Kích thước macro không khớp');
-    w.set(o.w); mac.set(m); M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); layer = 0; sel = -1; changed(); toast('Đã nhập — bấm «Lưu vào bàn phím» để ghi', 'ok');
+    w.set(o.w); mac.set(m); if (Array.isArray(o.ln)) LN = Array.from({ length: L }, (_, i) => String(o.ln[i] || '').slice(0, LNMAX)); M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); layer = 0; sel = -1; changed(); toast('Đã nhập — bấm «Lưu vào bàn phím» để ghi', 'ok');
   } catch (er) { toast(er.message, 'err', 5000); }
 }
 
 // ----- khung chung -----
 function renderAll() {
   if (layer >= nl()) layer = nl() - 1;
-  renderLayers(); renderDevice(); renderInspector(); renderLayerInfo(); renderAdv(); renderLed(); if (view === 'macro') renderMacro(); updateDirtyUI(); updateUndo(); renderTools();
+  renderLayers(); renderDevice(); renderInspector(); renderLayerInfo(); renderAdv(); renderLed(); renderMorse(); if (view === 'macro') renderMacro(); updateDirtyUI(); updateUndo(); renderTools();
 }
 function showView(v) {
   view = v; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.view === v)); $$('.view').forEach(s => s.classList.toggle('on', s.id === 'view-' + v));
-  const meta = { keymap: ['Bàn phím', 'Gán phím và layer'], macro: ['Macro', 'Viết chuỗi phím rồi gán vào phím'], adv: ['Nâng cao', 'Tap dance và combo'], led: ['Đèn LED', 'Hiệu ứng và tốc độ 6 dây LED'], conn: ['Kết nối', 'USB, Bluetooth và ghép đôi'], tools: ['Công cụ', 'Hồ sơ, thiết bị và phím tắt'] }[v];
+  const meta = { keymap: ['Bàn phím', 'Gán phím và layer'], macro: ['Macro', 'Viết chuỗi phím rồi gán vào phím'], morse: ['Morse', 'Gõ chữ bằng 3 phím: chấm, gạch, xong'], adv: ['Nâng cao', 'Tap dance và combo'], led: ['Đèn LED', 'Hiệu ứng và tốc độ 6 dây LED'], conn: ['Kết nối', 'USB, Bluetooth và ghép đôi'], tools: ['Công cụ', 'Hồ sơ, thiết bị và phím tắt'] }[v];
   $('#viewTitle').textContent = meta[0]; $('#viewSub').textContent = meta[1];
   if (v === 'macro') renderMacro();
+  if (v === 'led') renderLed(); else { clearInterval(ledTimer); ledTimer = 0; }
 }
 function applyTheme(t) {
   t = t === 'light' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; ls.set('numpad21.studio.theme', t);
@@ -1419,7 +1707,7 @@ function bind() {
   $('#bootBtn').onclick = async () => { if (await ask({ title: 'Vào bootloader?', msg: 'Bàn phím sẽ ngắt kết nối để nạp firmware UF2.', ok: 'Vào bootloader', danger: true })) { try { await xf(Object.assign(pkt(11, 0, 0), { 1: 5 })); } catch (e) { } } };
   $('#defaultsBtn').onclick = defaultsDevice; $('#exportBtn').onclick = exportProfile; $('#importBtn').onclick = () => $('#fileInput').click();
   $('#fileInput').onchange = e => { if (e.target.files[0]) importProfile(e.target.files[0]); e.target.value = ''; };
-  document.addEventListener('keydown', onKeyDown, true); bindLayers(); bindAdv(); bindMacro(); bindLed();
+  document.addEventListener('keydown', onKeyDown, true); bindLayers(); bindAdv(); bindMacro(); bindLed(); bindMorse();
   navigator.hid && navigator.hid.addEventListener('disconnect', e => { if (e.device === dev) onGone(); });
 }
 const SKINS = [['cream', 'Kem – Đen'], ['rose', 'Hồng – Nâu']];

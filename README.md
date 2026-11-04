@@ -18,12 +18,12 @@ Phan cung giu nguyen: Pro Micro nRF52840 (nice!nano v2), ma tran 7x7 co diode, 6
   | `TAB` | layer ke tiep |
   | `ESC` | bootloader (nap UF2) |
   | `.` | doi che do LED |
-- Nut layer nho: chuyen layer vong 0..5 (Numpad > Media > Nokia > L3 > L4 > L5).
+- Nut layer nho: chuyen layer vong 0..5 (Numpad > Media > Nokia > Morse > L4 > L5).
 - Ngu sau sau 15 phut khong dung khi khong cam USB; bam phim bat ky de thuc (phim dau tien bi mat).
 - Cau hinh (raw HID) CHI chay qua USB. BLE chi de go phim.
 
 ## Layer mac dinh (giong keymap ZMK cu)
-L0 Numpad, L1 Media/dieu huong, L2 Nokia (`*` = giu Shift, `/` = Caps Lock, `+` = Backspace), L3-L5 trong, L6 FN.
+L0 Numpad, L1 Media/dieu huong, L2 Nokia (`*` = giu Shift, `/` = Caps Lock, `+` = Backspace), L3 Morse (xem duoi), L4-L5 trong, L6 FN.
 
 ## Build
 Day len GitHub -> Actions -> "Build Numpad21 firmware" -> tai artifact `numpad21_nrf52840_uf2`. Hoac dung ban build san `prebuilt/numpad21_nrf52840.uf2`.
@@ -42,3 +42,24 @@ Bam RESET 2 lan nhanh -> o `NICENANO` -> keo file `.uf2` vao. Firmware nap tai 0
 - Firmware doi tu 32 layer/16 macro sang **16 layer/32 macro**. Dinh dang cau hinh thay doi nen sau khi nap firmware moi, cau hinh va macro cu se tu ve mac dinh.
 - Moi o macro 252 byte (234 byte buoc); toan bo macro 8068 byte, van gon trong 2 khoi flash.
 - Trang `firmware/numpad21.html` can ban moi (kiem tra firmware v11). `prebuilt/` da bi go vi chua build lai: hay build bang GitHub Actions.
+
+## Che do go Morse (FW_VER 12, hoan thien o 13)
+Vao layer 3 (bam nut layer nho 3 lan, hoac gan phim TG 3). 3 phim chinh: **1 = cham, 2 = gach, 3 = xong**.
+- Bam cham/gach: ky tu hien NGAY tren may tinh. Bam them thi firmware gui Backspace xoa ky tu cu roi gui ky tu cua ma dai hon (vd `.` -> e, `..` -> i, `..-` -> u).
+- Ma chua co ky tu (vd `..--`) chi xoa, go tiep van ra dung (`..--..` -> ?). Ma toi da 7 net.
+- **Xong** chot ky tu (khong gui gi). Space / Backspace / Enter / phim khac cung chot ky tu dang go.
+- Layer 3 mac dinh: `0` Space, `+` Backspace, `Enter`, `/` Caps Lock (chu hoa), `*` giu Shift, `ESC` ve layer 0.
+- Mat ket noi giua chung / macro chay: tu chot, khong bao gio Backspace nham ky tu khac.
+- Thiet bi da co cau hinh cu: layer 3 van trong. Vao tab **Morse** tren trang web -> «Bo cuc Morse day du -> Layer 3» (hoac chon 3 phim bat ky) -> Luu.
+- Tab **Morse** co o thu (chay dung thuat toan), bang ma 54 ky tu, gan phim.
+- **Gan vao phim bat ky, layer bat ky**: tab Ban phim -> chon phim -> nhom Morse (3 phim co the o cac layer khac nhau). Dung duoc ca trong tap dance (bam / giu / bam 2 lan) va ket qua combo (v13).
+- Ma phim: `0x7060` cham, `0x7061` gach, `0x7062` xong. Logic thuan C trong `firmware/numpad21/morse.h`.
+
+## Ten layer, 16 che do LED (FW_VER 13)
+- **Doi ten layer**: tab Ban phim -> nut «Doi ten» (hoac bam dup vao ten layer). Toi da 11 byte UTF-8 moi ten (co dau chiem 2-3 byte). Ten luu trong flash cua ban phim (file rieng `/n21nm`, lenh HID 8 doc / 9 ghi, luu khi bam Luu) nen **khong lam mat cau hinh cu**. De trong = ten mac dinh (BASE / FN / MORSE / LAYER n). Co trong file xuat/nhap JSON.
+- **16 che do LED** (them 7: hai den chay duoi, dem nhi phan, nhip tim, chay nguoc, co vao giua, hai nua doi phien, chop ngau nhien). Trang web xem truoc chay dong bang dung thuat toan cua firmware.
+- **Gan che do LED vao phim bat ky**: nhom «Den LED» trong bo chon phim: `LED 1..16` (ma `0x7020..0x702F`, chon thang) va `LED +` / `LED -`. Dung duoc trong tap dance / combo. Che do doi bang phim duoc nho sau khi tat nguon (ghi flash tre 3 giay sau lan bam cuoi).
+- Tap dance / combo gio chay duoc ca ma dac biet (doi layer, LED, macro, Morse...), khong chi phim HID.
+
+## Kiem thu
+`sh test/run_tests.sh` (can gcc, g++, node): test don vi C + fuzz, mo phong end-to-end chinh `numpad21.ino` (stub Arduino/TinyUSB), doi chieu C <-> JS tren 60000 su kien ngau nhien.
