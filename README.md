@@ -54,3 +54,7 @@ Bam RESET 2 lan nhanh -> o `NICENANO` -> keo file `.uf2` vao. Firmware nap tai 0
 - 16 che do LED (them: hai den chay duoi, dem nhi phan, nhip tim, chay nguoc, co vao giua, hai nua doi phien, chop ngau nhien). Phim `0x7020..0x702F` = chon thang che do 1..16; `LED +` / `LED -` doi tiep / lui. Che do doi bang phim duoc nho sau khi tat nguon (ghi flash sau 2 giay).
 - Ten layer (toi da 11 byte UTF-8 moi ten) luu o file `/n21nm` qua raw HID lenh 8 (doc) / 9 (ghi); app bam dup vao ten layer hoac nut "Doi ten". Can firmware v13.
 - Layer Morse mac dinh: ENTER = Tap dance 4 (bam 1 lan = Xong, bam 2 lan = Space, giu = Enter).
+
+## FW_VER 14: doi ten profile BLE + tat ngu sau
+- Ten 5 profile BLE doi duoc trong tab **Ket noi** cua `numpad21.html` (nut «Doi ten», toi da 11 byte UTF-8, de trong = «Numpad21 n»). Luu o file `/n21bn` qua raw HID lenh 12 (doc) / 13 (ghi); ban phim quang ba lai voi ten moi. May da ghep doi truoc do co the con nho ten cu: xoa thiet bi trong Bluetooth roi ghep lai.
+- **Tat ngu sau**: cong tac «Tat ngu sau» trong tab Ket noi (raw HID lenh 11, byte1 = 6, byte2 = 1 tat / 0 bat) hoac phim `0x7034` («Bat/tat ngu BLE», nhom Ket noi trong bang chon phim). Khi tat, ban phim khong tu ngu sau 15 phut o che do pin (luon san sang, nhung ton pin hon). Luu trong `/n21st`, giu sau khi tat nguon.

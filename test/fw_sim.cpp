@@ -64,7 +64,7 @@ int main(void) {
   CHECK(KM(3, P_DOT) == KC_MORSE_DOT && KM(3, P_DASH) == KC_MORSE_DASH && KM(3, P_OK) == KC_MORSE_OK && KM(3, P_HINT) == KC_MORSE_HINT, "defaults(): layer 3 chua dat phim Morse");
   CHECK(KM(3, 21) == LYN && KM(3, P_FN) == KC_TRNS && KM(0, P_FN) == MO(6), "layer 3 giu nut layer nho va FN");
   CHECK(KM(4, 19) == TL(0) && KM(5, 19) == TL(0), "layer 4, 5 van nhu cu");
-  CHECK(MORSE_HINT_DEF == 1 && FW_VER == 13 && NFX == 16 && QN == 64, "hang so");
+  CHECK(MORSE_HINT_DEF == 1 && FW_VER == 14 && NFX == 16 && QN == 64, "hang so");
   to_morse_layer();
   CHECK(res_key(P_DOT) == KC_MORSE_DOT && res_key(P_OK) == KC_MORSE_OK, "chua vao layer Morse sau 3 lan");
   CHECK(res_key(1) == 0 && res_key(8) == 0, "phim khac bi chan");
@@ -217,6 +217,16 @@ int main(void) {
     r[0] = 9; r[1] = 0; r[2] = 28; memset(r + 3, 'x', 28); raw_process(r, 32); CHECK(lname[0][NML - 1] == 0 && lname[1][NML - 1] == 0, "byte cuoi moi ten luon la 0");
     LD(LD_MODE) = 7; r[0] = 5; raw_process(r, 32); CHECK(rep[16] == 7, "info bao che do LED hien tai cho app");
     r[0] = 4; raw_process(r, 32); CHECK(lname[1][0] == 0, "ve mac dinh xoa ten layer");
+    // FW_VER 14: ten profile BLE (lenh 12/13) + tat ngu sau (lenh 11/6, phim 0x7034)
+    memset(r, 0, 32); r[0] = 13; r[1] = 12; r[2] = 7; memcpy(r + 3, "Laptop\0", 7); raw_process(r, 32);
+    CHECK(!strcmp(bname[1], "Laptop") && bname_dirty && adv_reconf, "ten profile BLE 2 sau lenh 13");
+    memset(r, 0, 32); r[0] = 12; r[1] = 0; r[2] = 28; raw_process(r, 32); CHECK(!memcmp(rep + 3 + 12, "Laptop\0", 7) && rep[3] == 0, "lenh 12 doc lai ten profile BLE");
+    memset(r, 0, 32); r[0] = 13; r[1] = 0; r[2] = 28; memset(r + 3, 'y', 28); raw_process(r, 32); CHECK(bname[0][NML - 1] == 0 && bname[1][NML - 1] == 0, "byte cuoi moi ten BLE luon la 0");
+    memset(r, 0, 32); r[0] = 13; r[1] = 50; r[2] = 28; raw_process(r, 32); CHECK(bname[4][NML - 1] == 0, "ghi ten BLE vuot vung bi tu choi");
+    memset(r, 0, 32); r[0] = 11; r[1] = 6; r[2] = 1; raw_process(r, 32); CHECK(nosleep == 1 && rep[17] == 1, "lenh 11/6 tat ngu sau, info bao nosleep");
+    r[2] = 0; raw_process(r, 32); CHECK(nosleep == 0 && rep[17] == 0, "lenh 11/6 bat lai ngu sau");
+    reset_all(); KM(0, 1) = KC_SLEEP_TOG; nosleep = 0; tapk(1); CHECK(nosleep == 1, "phim SLEEP_TOG bat nosleep"); tapk(1); CHECK(nosleep == 0, "phim SLEEP_TOG tat lai");
+    nosleep = 1; memset(r, 0, 32); r[0] = 4; raw_process(r, 32); CHECK(bname[1][0] == 0 && nosleep == 0, "ve mac dinh xoa ten BLE va bat lai ngu sau");
   }
 printf("%d kiem tra end-to-end, %d loi\n", checks, fails);
   return fails ? 1 : 0;

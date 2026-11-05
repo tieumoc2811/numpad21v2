@@ -930,7 +930,9 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
           <div class="card"><div class="card-hd"><h2>Trạng thái</h2><span class="sub">cập nhật mỗi 2 giây</span></div><div class="card-bd"><div class="tool-actions" id="conStat"></div>
             <p class="hint">Cấu hình chỉ làm được qua cáp USB. Khi USB và BLE cùng sẵn sàng, bàn phím gửi qua đường được ưu tiên; nếu đường đó chưa sẵn sàng sẽ tự dùng đường còn lại.</p></div></div>
           <div class="card"><div class="card-hd"><h2>Đường gửi ưu tiên</h2></div><div class="card-bd"><div class="tool-actions"><button class="btn" id="oUsb">Ưu tiên USB</button><button class="btn" id="oBle">Ưu tiên BLE</button></div></div></div>
-          <div class="card"><div class="card-hd"><h2>Hồ sơ BLE</h2><span class="sub">5 thiết bị ghép đôi</span></div><div class="card-bd"><div class="tool-actions" id="slots"></div></div></div>
+          <div class="card"><div class="card-hd"><h2>Hồ sơ BLE</h2><span class="sub">bấm số để chọn · bấm ✎ để đổi tên</span></div><div class="card-bd"><div class="tool-actions" id="slots"></div><div id="slotNames" style="margin-top:12px"></div>
+            <p class="hint">Tên tối đa 11 byte. Để trống = «Numpad21 n». Máy đã ghép đôi có thể còn nhớ tên cũ — hãy xoá thiết bị đó trong Bluetooth rồi ghép lại để thấy tên mới.</p></div></div>
+          <div class="card"><div class="card-hd"><h2>Chế độ ngủ BLE</h2><span class="sub">firmware v14</span></div><div class="card-bd"><div class="toggle-row" style="border-top:0;margin-top:0;padding-top:0"><div class="t"><b>Tắt ngủ sâu</b><small>Không tự ngủ sau 15 phút khi chạy pin — luôn sẵn sàng nhưng tốn pin hơn</small></div><button class="switch" id="noSleep" aria-label="Tắt ngủ sâu"></button></div></div></div>
           <div class="card"><div class="card-hd"><h2>Ghép đôi</h2></div><div class="card-bd"><button class="btn danger" id="bClr">Xoá toàn bộ ghép đôi BLE</button></div></div>
         </div>
       </section>
@@ -1094,7 +1096,7 @@ for (let n = 0; n < 4; n++) add(TDK(n), 'TD' + (n + 1), 'Đặc biệt', 'Tap da
 add(NKK(9), 'NK0', 'Nokia', 'Nokia 0'); add(NKK(10), 'NKP', 'Nokia', 'Nokia .,?!');
 add(0x7001, 'Latch', 'Đặc biệt'); add(0x7002, 'TgSpace', 'Đặc biệt', 'Giữ Space'); add(0x7003, 'TgShift', 'Đặc biệt', 'Giữ Shift'); add(0x7004, 'TgCtrl', 'Đặc biệt', 'Giữ Ctrl'); add(0x7005, 'TgAlt', 'Đặc biệt', 'Giữ Alt');
 for (let i = 0; i < 32; i++) add(0x7100 + i, 'M' + (i + 1), 'Macro', 'Macro ' + (i + 1));
-add(0x7030, 'OutTog', 'Kết nối', 'USB⇄BLE'); add(0x7031, 'OutUSB', 'Kết nối', 'Dùng USB'); add(0x7032, 'OutBLE', 'Kết nối', 'Dùng BLE'); add(0x7033, 'BtClr', 'Kết nối', 'Xóa ghép đôi');
+add(0x7030, 'OutTog', 'Kết nối', 'USB⇄BLE'); add(0x7031, 'OutUSB', 'Kết nối', 'Dùng USB'); add(0x7032, 'OutBLE', 'Kết nối', 'Dùng BLE'); add(0x7033, 'BtClr', 'Kết nối', 'Xóa ghép đôi'); add(0x7034, 'SleepTog', 'Kết nối', 'Bật/tắt ngủ BLE');
 for (let i = 0; i < 5; i++) add(0x7040 + i, 'BT' + (i + 1), 'Kết nối', 'BT ' + (i + 1));
 add(0x7010, 'LedNext', 'Đèn LED', 'LED +'); add(0x7011, 'LedPrev', 'Đèn LED', 'LED −');
 FX.forEach((f, i) => add(0x7020 + i, f[0], 'Đèn LED', 'LED ' + (i + 1)));   // chọn thẳng chế độ 1..16 (firmware v13)
@@ -1123,7 +1125,7 @@ function keyCode(tok) {
 
 // ===== trạng thái =====
 let dev = null, info = null, w = new Uint16Array(NW), w0 = null, mac = null, mac0 = null, MSLOT = 252, NMAC = 32;
-let layer = 0, sel = -1, pickCb = null, pending = null, chain = Promise.resolve(), pollT = 0;
+let BN = Array(5).fill(''), layer = 0, sel = -1, pickCb = null, pending = null, chain = Promise.resolve(), pollT = 0;
 const nl = () => Math.min(L, Math.max(1, w[NLI] | 0 || 1));
 const K = (l, p) => l * NK + p;
 
@@ -1144,7 +1146,7 @@ function xf(b) { const p = chain.then(() => xfer(b)); chain = p.catch(() => {});
 function pkt(cmd, off, n) { const b = new Uint8Array(32); b[0] = cmd; b[1] = off & 255; b[2] = n; b[31] = off >> 8; return b; }
 async function getInfo() {
   const r = await xf(pkt(5, 0, 0));
-  info = { L: r[1], NW: r[2] | r[3] << 8, ver: r[4], nfx: r[5], nmac: r[6], mslot: r[7] | r[8] << 8, nk: r[9], out: r[10], slot: r[11], ble: r[12], usb: r[13], tr: r[14], vbus: r[15], led: r[16] };
+  info = { L: r[1], NW: r[2] | r[3] << 8, ver: r[4], nfx: r[5], nmac: r[6], mslot: r[7] | r[8] << 8, nk: r[9], out: r[10], slot: r[11], ble: r[12], usb: r[13], tr: r[14], vbus: r[15], led: r[16], nosleep: r[17] };
   return info;
 }
 async function readAll() {
@@ -1159,7 +1161,7 @@ async function readAll() {
     mac.set(r.subarray(3, 3 + n), off);
     if ((off / 28) % 8 === 0) prog('Đọc macro ' + Math.round(50 + (off + n) * 50 / mac.length) + '%');
   }
-  await readNames();
+  await readNames(); await readBleNames();
   w0 = w.slice(); mac0 = mac.slice();
 }
 async function readNames() {   // lenh 8: doc ten 16 layer (firmware v13+)
@@ -1170,6 +1172,29 @@ async function readNames() {   // lenh 8: doc ten 16 layer (firmware v13+)
     for (let l = 0; l < L; l++) { const sl = buf.subarray(l * LNL, (l + 1) * LNL), e = sl.indexOf(0); LN[l] = TD_.decode(e < 0 ? sl : sl.subarray(0, e)); }
   }
   LN0 = JSON.stringify(LN);
+}
+async function readBleNames() {   // lenh 12: doc ten 5 profile BLE (firmware v14+)
+  BN = Array(5).fill('');
+  if (!info || info.ver < 14) return;
+  const buf = new Uint8Array(5 * LNL);
+  for (let off = 0; off < buf.length; off += 28) { const n = Math.min(28, buf.length - off), r = await xf(pkt(12, off, n)); buf.set(r.subarray(3, 3 + n), off); }
+  for (let i = 0; i < 5; i++) { const sl = buf.subarray(i * LNL, (i + 1) * LNL), e = sl.indexOf(0); BN[i] = TD_.decode(e < 0 ? sl : sl.subarray(0, e)); }
+}
+async function writeBleNames() {   // lenh 13: ghi ten 5 profile BLE, roi lenh 3 de luu flash
+  const buf = new Uint8Array(5 * LNL);
+  BN.forEach((nm, i) => buf.set(TE.encode(nm).subarray(0, LNMAX), i * LNL));
+  for (let off = 0; off < buf.length; off += 28) { const n = Math.min(28, buf.length - off), b = pkt(13, off, n); b.set(buf.subarray(off, off + n), 3); await xf(b); }
+  await xf(pkt(3, 0, 0));
+}
+async function renameBle(i) {
+  if (!dev) { toast('Hãy kết nối bàn phím trước.', 'warn'); return; }
+  if (!info || info.ver < 14) { toast('Firmware v' + (info ? info.ver : '?') + ' chưa đổi được tên BLE — hãy nạp firmware v14.', 'warn', 5000); return; }
+  const def = 'Numpad21 ' + (i + 1);
+  const v = await ask({ title: 'Đổi tên hồ sơ BLE ' + (i + 1), msg: 'Tối đa ' + LNMAX + ' byte (≈ ' + LNMAX + ' chữ không dấu, hoặc ít hơn nếu có dấu). Để trống = tên mặc định (' + def + ').', input: true, value: BN[i], placeholder: def, ok: 'Đổi tên' });
+  if (v === false) return;
+  const name = String(v).replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  if (TE.encode(name).length > LNMAX) { toast('Tên quá dài (' + TE.encode(name).length + '/' + LNMAX + ' byte). Rút gọn rồi thử lại.', 'warn', 4500); return; }
+  try { BN[i] = name; await writeBleNames(); renderStat(); toast(name ? 'Đã đặt tên hồ sơ ' + (i + 1) + ': ' + name : 'Hồ sơ ' + (i + 1) + ' về tên mặc định', 'ok'); } catch (e) { toast('Lỗi: ' + e.message, 'err', 4500); }
 }
 async function writeNames() {   // lenh 9: ghi ten 16 layer
   const buf = new Uint8Array(L * LNL);
@@ -1648,12 +1673,15 @@ function bindLed() {
 async function ctl(op, arg) { const b = pkt(11, 0, 0); b[1] = op; b[2] = arg || 0; await xf(b); await getInfo(); renderStat(); }
 function renderStat() {
   const el = $('#conStat'), s = $('#slots');
-  if (!info) { el.innerHTML = '<span class="pill-s">Chưa kết nối</span>'; s.innerHTML = ''; return; }
+  if (!info) { el.innerHTML = '<span class="pill-s">Chưa kết nối</span>'; s.innerHTML = ''; $('#slotNames').innerHTML = ''; return; }
   const tr = ['không có', 'USB', 'BLE'][info.tr] || '?';
   el.innerHTML = '<span class="pill-s ' + (info.usb ? 'ok' : 'warn') + '">USB ' + (info.usb ? 'sẵn sàng' : 'chưa') + '</span><span class="pill-s ' + (info.ble ? 'ok' : '') + '">BLE ' + (info.ble ? 'đã kết nối' : 'chưa kết nối') + '</span><span class="pill-s">Ưu tiên: ' + (info.out ? 'BLE' : 'USB') + '</span><span class="pill-s">Đang gửi qua: ' + tr + '</span><span class="pill-s">Hồ sơ BLE: ' + (info.slot + 1) + '</span>';
   $('#oUsb').classList.toggle('active', !info.out); $('#oBle').classList.toggle('active', !!info.out);
   s.innerHTML = [0, 1, 2, 3, 4].map(i => '<button class="btn ' + (i === info.slot ? 'primary' : '') + '" data-slot="' + i + '">' + (i + 1) + '</button>').join('');
   $$('#slots [data-slot]').forEach(b => b.onclick = () => ctl(3, +b.dataset.slot));
+  $('#slotNames').innerHTML = [0, 1, 2, 3, 4].map(i => '<div class="toggle-row" style="' + (i ? '' : 'border-top:0;margin-top:0;padding-top:0') + '"><div class="t"><b>' + (i + 1) + (i === info.slot ? ' · đang dùng' : '') + '</b><small>' + esc(BN[i] || 'Numpad21 ' + (i + 1)) + (BN[i] ? '' : ' (mặc định)') + '</small></div><button class="btn" data-ren="' + i + '"' + (info.ver < 14 ? ' disabled title="Cần firmware v14"' : '') + '>✎ Đổi tên</button></div>').join('');
+  $$('#slotNames [data-ren]').forEach(b => b.onclick = () => renameBle(+b.dataset.ren));
+  $('#noSleep').classList.toggle('on', !!info.nosleep); $('#noSleep').disabled = info.ver < 14;
   $('#devLed').style.background = info.usb || info.ble ? 'var(--ok)' : '';
 }
 function renderTools() {
@@ -1666,7 +1694,7 @@ function updateConnUI() {
   $('#connSub').textContent = on ? 'Đã kết nối · nhớ bấm Lưu' : 'Cắm cáp USB để cấu hình';
   $('#discBtn').style.display = on ? '' : 'none'; $('#connBtn').style.display = on ? 'none' : '';
   const mc = $('#mobileConn'); mc.classList.toggle('on', on); mc.querySelector('span').textContent = on ? 'Đã kết nối' : 'Kết nối';
-  $('#saveBtn').disabled = !on || !loaded; ['#defaultsBtn', '#bootBtn', '#oUsb', '#oBle', '#bClr'].forEach(s => $(s).disabled = !on);
+  $('#saveBtn').disabled = !on || !loaded; ['#defaultsBtn', '#bootBtn', '#oUsb', '#oBle', '#bClr', '#noSleep'].forEach(s => $(s).disabled = !on);
   $('#exportBtn').disabled = $('#importBtn').disabled = !loaded; renderStat(); renderTools();
 }
 async function openDevice(d) {
@@ -1774,6 +1802,7 @@ function bind() {
   $('#pkHexOk').onclick = () => { const v = parseInt($('#pkHex').value, 16); if (!isNaN(v) && v >= 0 && v < 0x10000) assign(v); else toast('Mã hex không hợp lệ', 'warn'); };
   $('#dlgOk').onclick = () => { const i = $('#dlgInput'); closeDlg(i.hidden ? true : i.value); }; $('#dlgCancel').onclick = () => closeDlg(false);
   $('#oUsb').onclick = () => ctl(0); $('#oBle').onclick = () => ctl(1);
+  $('#noSleep').onclick = async () => { if (!info || info.ver < 14) { toast('Cần firmware v14 để tắt ngủ BLE.', 'warn', 4000); return; } try { await ctl(6, info.nosleep ? 0 : 1); toast(info.nosleep ? 'Đã tắt ngủ sâu — bàn phím luôn sẵn sàng' : 'Đã bật lại ngủ sâu sau 15 phút', 'ok'); } catch (e) { toast('Lỗi: ' + e.message, 'err', 4500); } };
   $('#bClr').onclick = async () => { if (await ask({ title: 'Xoá ghép đôi BLE?', msg: 'Toàn bộ 5 hồ sơ ghép đôi sẽ bị xoá.', ok: 'Xoá', danger: true })) ctl(4); };
   $('#bootBtn').onclick = async () => { if (await ask({ title: 'Vào bootloader?', msg: 'Bàn phím sẽ ngắt kết nối để nạp firmware UF2.', ok: 'Vào bootloader', danger: true })) { try { await xf(Object.assign(pkt(11, 0, 0), { 1: 5 })); } catch (e) { } } };
   $('#defaultsBtn').onclick = defaultsDevice; $('#exportBtn').onclick = exportProfile; $('#importBtn').onclick = () => $('#fileInput').click();

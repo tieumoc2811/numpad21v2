@@ -24,7 +24,7 @@ enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..16, ms moi buoc, s
 #define LD(i) cfg.w[LDB + (i)]
 #define NFX 16
 #define MAGIC 0x4E323131u
-#define FW_VER 13            // 11 = 16 layer / 32 macro, 12 = go Morse 3 phim + goi y (0x7060..0x7063), 13 = 16 che do LED (+ phim LED 1..16) + ten layer luu trong flash (lenh 8/9)
+#define FW_VER 14            // 11 = 16 layer / 32 macro, 12 = go Morse 3 phim + goi y (0x7060..0x7063), 13 = 16 che do LED (+ phim LED 1..16) + ten layer luu trong flash (lenh 8/9), 14 = doi ten 5 profile BLE (lenh 12/13) + tat ngu sau BLE (lenh 11/6, phim 0x7034)
 
 #define KC_TRNS 1
 #define CONS(x) (0x8000 | (x))
@@ -41,6 +41,7 @@ enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..16, ms moi buoc, s
 #define KC_OUT_USB 0x7031
 #define KC_OUT_BLE 0x7032
 #define KC_BT_CLR 0x7033           // xoa toan bo ghep doi BLE
+#define KC_SLEEP_TOG 0x7034        // bat / tat ngu sau khi khong dung (khi khong cam USB)
 #define KC_BT_SEL 0x7040           // 0x7040..0x7044 = profile BLE 0..4
 #define NBT 5
 #define KC_MACRO 0x7100            // 0x7100 + n
@@ -64,6 +65,7 @@ enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..16, ms moi buoc, s
 #define CFG_FILE "/n21cfg"
 #define MAC_FILE "/n21mac"
 #define ST_FILE "/n21st"
+#define BN_FILE "/n21bn"          // ten 5 profile BLE: moi ten 12 byte (toi da 11 byte UTF-8 + byte 0); ten trong = "Numpad21 n"
 #define NM_FILE "/n21nm"          // ten 16 layer: moi ten 12 byte (toi da 11 byte UTF-8 + byte 0)
 #define NML 12
 #define MAC_MAGIC 0x3143414Du
@@ -165,17 +167,22 @@ static bool file_write(const char *path, const void *buf, uint32_t n) {
 }
 static char lname[L][NML];   // ten layer
 static bool name_dirty;
+static char bname[NBT][NML]; // ten 5 profile BLE
+static bool bname_dirty;
+static uint8_t nosleep;      // 1 = khong bao gio ngu sau (ton pin hon)
 static uint8_t outsel;      // 0 = uu tien USB, 1 = uu tien BLE
 static uint8_t bt_slot;     // profile BLE 0..4
-static void state_save(void) { uint32_t st[2] = {ST_MAGIC, (uint32_t)outsel | (uint32_t)bt_slot << 8 | (uint32_t)(uint8_t)LD(LD_MODE) << 16}; file_write(ST_FILE, st, sizeof st); }   // che do LED o day de doi bang phim khong ghi nham cau hinh app chua luu
+static void state_save(void) { uint32_t st[2] = {ST_MAGIC, (uint32_t)outsel | (uint32_t)bt_slot << 8 | (uint32_t)(uint8_t)LD(LD_MODE) << 16 | (uint32_t)(nosleep & 1) << 24}; file_write(ST_FILE, st, sizeof st); }   // che do LED o day de doi bang phim khong ghi nham cau hinh app chua luu
 static void load_all(void) {
   if (!file_read(CFG_FILE, &cfg, sizeof cfg) || cfg.magic != MAGIC) defaults();
   uint32_t mg = 0;
   if (!file_read(MAC_FILE, macimg, sizeof macimg)) mac_defaults(); else { memcpy(&mg, macimg, 4); if (mg != MAC_MAGIC) mac_defaults(); }
   memset(lname, 0, sizeof lname);
   if (file_read(NM_FILE, lname, sizeof lname)) for (int l = 0; l < L; l++) lname[l][NML - 1] = 0; else memset(lname, 0, sizeof lname);
+  memset(bname, 0, sizeof bname);
+  if (file_read(BN_FILE, bname, sizeof bname)) for (int i = 0; i < NBT; i++) bname[i][NML - 1] = 0; else memset(bname, 0, sizeof bname);
   uint32_t st[2] = {0, 0};
-  if (file_read(ST_FILE, st, sizeof st) && st[0] == ST_MAGIC) { outsel = st[1] & 1; bt_slot = (st[1] >> 8) % NBT; uint8_t lm = st[1] >> 16; if (lm >= 1 && lm <= NFX) LD(LD_MODE) = lm; }
+  if (file_read(ST_FILE, st, sizeof st) && st[0] == ST_MAGIC) { nosleep = (st[1] >> 24) & 1; outsel = st[1] & 1; bt_slot = (st[1] >> 8) % NBT; uint8_t lm = st[1] >> 16; if (lm >= 1 && lm <= NFX) LD(LD_MODE) = lm; }
   if (LD(LD_MODE) < 1 || LD(LD_MODE) > NFX || LD(LD_TICK) < 20 || LD(LD_TICK) > 2000) { LD(LD_MODE) = 2; LD(LD_TICK) = 100; }
   if (cfg.w[NLI] < 1 || cfg.w[NLI] > L) cfg.w[NLI] = 7;
 }
@@ -403,7 +410,7 @@ static void ble_adv_setup(void) {   // dat dia chi + ten theo profile, roi quang
   a.addr[0] = lo; a.addr[1] = lo >> 8; a.addr[2] = lo >> 16; a.addr[3] = lo >> 24; a.addr[4] = hi; a.addr[5] = (hi >> 8) | 0xC0;
   a.addr[1] += bt_slot * 0x11;   // moi profile 1 dia chi rieng (profile 0 giu dia chi goc)
   Bluefruit.setAddr(&a);
-  char nm[16]; snprintf(nm, sizeof nm, "Numpad21 %u", bt_slot + 1); Bluefruit.setName(nm);
+  char nm[NML + 1]; if (bname[bt_slot][0]) { memcpy(nm, bname[bt_slot], NML); nm[NML] = 0; } else snprintf(nm, sizeof nm, "Numpad21 %u", bt_slot + 1); Bluefruit.setName(nm);
   Bluefruit.Advertising.clearData(); Bluefruit.ScanResponse.clearData();
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
   Bluefruit.Advertising.addTxPower();
@@ -459,6 +466,7 @@ static void hid_task(void) {
 // ---------------- xu ly nhan phim ----------------
 static void out_action(uint16_t kc) {
   if (kc == KC_OUT_TOG) out_set(outsel ^ 1); else if (kc == KC_OUT_USB) out_set(0); else if (kc == KC_OUT_BLE) out_set(1);
+  else if (kc == KC_SLEEP_TOG) { nosleep ^= 1; state_save(); act_ms = ms(); dirty = true; }
   else if (kc == KC_BT_CLR) { if (ble_conn) Bluefruit.disconnect(ble_hdl); Bluefruit.Periph.clearBonds(); adv_reconf = true; }
 }
 static void fire(int p, uint16_t kc) {
@@ -470,7 +478,7 @@ static void fire(int p, uint16_t kc) {
   if (kc == KC_BOOT) { enterUf2Dfu(); return; }
   if (kc == KC_LED_NEXT || kc == KC_LED_PREV) { led_next(kc == KC_LED_NEXT ? 1 : -1); return; }
   if (kc >= KC_LED_SEL && kc < KC_LED_SEL + NFX) { led_set(kc - KC_LED_SEL + 1); return; }
-  if (kc >= KC_OUT_TOG && kc <= KC_BT_CLR) { out_action(kc); return; }
+  if (kc >= KC_OUT_TOG && kc <= KC_SLEEP_TOG) { out_action(kc); return; }
   if (kc >= KC_BT_SEL && kc < KC_BT_SEL + NBT) { ble_select(kc - KC_BT_SEL); return; }
   if ((kc & 0xFF00) == KC_MACRO && (kc & 255) < NMAC) { if (!latch_wait) mc_start(kc & 255); return; }
   if ((kc & 0xF000) == 0x5000) { td_press(p, kc & 3); return; }
@@ -542,7 +550,8 @@ static uint32_t scan(void) {
 // ---------------- Raw HID (USB): [cmd, off, n, data...] ----------------
 // 1 doc cfg (word), 2 ghi cfg, 3 luu flash, 4 mac dinh, 5 info, 6 doc macro (byte), 7 ghi macro (byte, n<=28, off cao o byte 31),
 // 8 doc ten layer (byte, n<=28), 9 ghi ten layer (12 byte/ten)
-// 11 dieu khien: byte1 = 0 USB / 1 BLE / 2 doi / 3 chon profile (byte2) / 4 xoa ghep doi / 5 vao bootloader
+// 12 doc ten profile BLE (byte, n<=28), 13 ghi ten profile BLE (12 byte/ten, 5 ten; ghi xong tu quang ba lai voi ten moi)
+// 11 dieu khien: byte1 = 0 USB / 1 BLE / 2 doi / 3 chon profile (byte2) / 4 xoa ghep doi / 5 vao bootloader / 6 ngu sau (byte2: 0 = bat, 1 = tat)
 static uint8_t rep[32]; static bool rep_pending, save_req;
 static volatile uint8_t rx_n; static uint8_t rx_buf[32];
 static void raw_set_cb(uint8_t id, hid_report_type_t t, uint8_t const *b, uint16_t sz) {   // chay trong task USB: chi chep ra, xu ly o loop()
@@ -572,17 +581,25 @@ static void raw_process(const uint8_t *b, uint16_t sz) {
       if (b[0] == 9 && sz >= 4 + i) { nm[off + i] = ((off + i) % NML == NML - 1) ? 0 : b[3 + i]; name_dirty = true; }
       rep[3 + i] = nm[off + i];
     }
+  } else if ((b[0] == 12 || b[0] == 13) && sz >= 3 && b[2] <= 28 && off + b[2] <= NBT * NML) {   // ten profile BLE (byte): 12 doc, 13 ghi
+    rep[1] = b[1]; rep[2] = b[2]; rep[31] = off >> 8;
+    uint8_t *bn = (uint8_t *)bname;
+    for (int i = 0; i < b[2]; i++) {
+      if (b[0] == 13 && sz >= 4 + i) { bn[off + i] = ((off + i) % NML == NML - 1) ? 0 : b[3 + i]; bname_dirty = true; adv_reconf = true; }
+      rep[3 + i] = bn[off + i];
+    }
   } else if (b[0] == 3) save_req = true;
-  else if (b[0] == 4) { defaults(); relayer(); mc_stop(); mac_defaults(); mac_dirty = true; memset(lname, 0, sizeof lname); name_dirty = true; }
+  else if (b[0] == 4) { defaults(); relayer(); mc_stop(); mac_defaults(); mac_dirty = true; memset(lname, 0, sizeof lname); name_dirty = true; memset(bname, 0, sizeof bname); bname_dirty = true; adv_reconf = true; nosleep = 0; state_save(); }
   else if (b[0] == 11 && sz >= 2) {
     if (b[1] == 0) out_set(0); else if (b[1] == 1) out_set(1); else if (b[1] == 2) out_set(outsel ^ 1);
     else if (b[1] == 3 && sz >= 3) ble_select(b[2]);
     else if (b[1] == 4) out_action(KC_BT_CLR);
     else if (b[1] == 5) enterUf2Dfu();
+    else if (b[1] == 6 && sz >= 3) { nosleep = b[2] & 1; state_save(); act_ms = ms(); }
   } else if (b[0] == 5) { /* info ben duoi */ }
   if (b[0] == 5 || b[0] == 11) {
     rep[1] = L; rep[2] = NW & 255; rep[3] = NW >> 8; rep[4] = FW_VER; rep[5] = NFX; rep[6] = NMAC; rep[7] = MSLOT & 255; rep[8] = MSLOT >> 8;
-    rep[9] = NK; rep[10] = outsel; rep[11] = bt_slot; rep[12] = ble_conn; rep[13] = usb_ok(); rep[14] = transport(); rep[15] = vbus(); rep[16] = LD(LD_MODE);
+    rep[9] = NK; rep[10] = outsel; rep[11] = bt_slot; rep[12] = ble_conn; rep[13] = usb_ok(); rep[14] = transport(); rep[15] = vbus(); rep[16] = LD(LD_MODE); rep[17] = nosleep;
   }
   rep_pending = true;
 }
@@ -590,6 +607,7 @@ static void save_all(void) {
   file_write(CFG_FILE, &cfg, sizeof cfg);
   if (mac_dirty) { mac_dirty = false; file_write(MAC_FILE, macimg, sizeof macimg); }
   if (name_dirty) { name_dirty = false; file_write(NM_FILE, lname, sizeof lname); }
+  if (bname_dirty) { bname_dirty = false; file_write(BN_FILE, bname, sizeof bname); }
   led_save_req = false;
   state_save();
 }
@@ -666,7 +684,7 @@ void loop() {
       if (want && !Bluefruit.Advertising.isRunning()) Bluefruit.Advertising.start(0);
       else if (!want && Bluefruit.Advertising.isRunning()) Bluefruit.Advertising.stop();
     }
-    if (!vb_cache && !raw && mc_id < 0 && now - act_ms > SLEEP_MS) sleep_now();
+    if (!vb_cache && !raw && mc_id < 0 && now - act_ms > SLEEP_MS && !nosleep) sleep_now();
   }
   delay(raw || now - act_ms < 1500 || mc_id >= 0 || tds || pend >= 0 ? 1 : 5);   // luc nghi quet cham de tiet kiem pin
 }
