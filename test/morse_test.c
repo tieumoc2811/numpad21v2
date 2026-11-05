@@ -304,10 +304,35 @@ static int stream_mode(int hint) {
   return 0;
 }
 
+// ---- den LED bao Morse: bang gia tri mong doi + luoi in ra de doi chieu voi ban JS ----
+static void test_led_frame(void) {
+  CHECK(morse_led_frame(1, 0, 0, 100000) == 0x3F, "cham: nhay ngan luc dau");
+  CHECK(morse_led_frame(1, 0, MORSE_LED_DOT_MS - 1, 100000) == 0x3F, "cham: con trong 80 ms");
+  CHECK(morse_led_frame(1, 0, MORSE_LED_DOT_MS, 100000) == 0x01, "cham: het nhay -> thanh 1 den");
+  CHECK(morse_led_frame(2, 1, MORSE_LED_DASH_MS - 1, 100000) == 0x3F, "gach: con trong 240 ms");
+  CHECK(morse_led_frame(2, 1, MORSE_LED_DASH_MS, 100000) == 0x03, "gach: het nhay -> thanh 2 den");
+  CHECK(morse_led_frame(2, 0, 100, 100000) == 0x03, "cham thu 2: sau 100 ms thanh 2 den");
+  for (uint8_t n = 1; n <= MORSE_MAX; n++) CHECK(morse_led_frame(n, 0, 1000, 100000) == (n >= 6 ? 0x3F : (1u << n) - 1), "thanh den len=%d", n);
+  CHECK(morse_led_frame(3, 0, MORSE_LED_HOLD_MS - 1, 100000) == 0x07, "con giu thanh den truoc 2.5 s");
+  CHECK(morse_led_frame(3, 0, MORSE_LED_HOLD_MS, 100000) == MORSE_LED_NONE, "qua 2.5 s tra lai hieu ung");
+  CHECK(morse_led_frame(0, 0, 10, 100000) == MORSE_LED_NONE, "khong go gi: khong de len hieu ung");
+  CHECK(morse_led_frame(0, 0, 100000, 0) == 0x3F && morse_led_frame(0, 0, 100000, 69) == 0x3F, "chot: pha sang 1");
+  CHECK(morse_led_frame(0, 0, 100000, 70) == 0 && morse_led_frame(0, 0, 100000, 139) == 0, "chot: pha tat");
+  CHECK(morse_led_frame(0, 0, 100000, 140) == 0x3F && morse_led_frame(0, 0, 100000, 209) == 0x3F, "chot: pha sang 2");
+  CHECK(morse_led_frame(0, 0, 100000, 210) == 0 && morse_led_frame(0, 0, 100000, 279) == 0, "chot: pha tat 2");
+  CHECK(morse_led_frame(0, 0, 100000, 280) == MORSE_LED_NONE, "chot: het nhay doi");
+}
+static int ledframes_mode(void) {   // in ra mat na voi luoi (len, dash, since_press, since_ack) - ban JS phai ra y het
+  for (int len = 0; len <= MORSE_MAX; len++) for (int d = 0; d < 2; d++) for (uint32_t sp = 0; sp < 3000; sp += 7) for (uint32_t sa = 0; sa < 400; sa += 13) printf("%d\n", morse_led_frame((uint8_t)len, (uint8_t)d, sp, sa));
+  return 0;
+}
+
 int main(int argc, char **argv) {
+  if (argc > 1 && !strcmp(argv[1], "--ledframes")) return ledframes_mode();
   if (argc > 1 && !strcmp(argv[1], "--stream")) return stream_mode(argc > 2 && !strcmp(argv[2], "--hint"));
   test_table(); test_user_example(); test_invalid_then_valid(); test_full_length(); test_every_char_and_prefixes(); test_sentence(); test_room();
   test_fuzz_vs_reference(); test_queue_never_desyncs(); test_hid_mapping();
+  test_led_frame();
   test_hint_format(); test_hint_every_prefix(); test_hint_toggle(); test_hint_fuzz(); test_hint_queue_never_desyncs(); test_hint_hid_chars();
   printf("%d kiem tra, %d loi\n", checks, fails);
   return fails ? 1 : 0;

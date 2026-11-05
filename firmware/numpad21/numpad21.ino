@@ -47,8 +47,10 @@ enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..9, ms moi buoc, sa
 #define KC_MORSE_DASH 0x7061       // Morse: phim gach
 #define KC_MORSE_OK 0x7062         // Morse: xong 1 ky tu (chot ky tu)
 #define KC_MORSE_HINT 0x7063       // Morse: bat / tat goi y tren van ban (" [.i -a]" sau ky tu dang go)
+#define KC_MORSE_LED 0x7064        // Morse: bat / tat den LED bao trang thai go (cham nhay ngan, gach nhay dai, thanh den = so net, nhay doi = chot)
+#define MORSE_LED_DEF 1            // den bao Morse mac dinh luc khoi dong: 1 = bat (khong luu flash; doi bang phim Morse "Den")
 #define MORSE_HINT_DEF 1           // goi y mac dinh luc khoi dong: 1 = bat, 0 = tat (khong luu flash; doi bang phim Morse "Goi y")
-#define IS_MORSE(k) ((k) >= KC_MORSE_DOT && (k) <= KC_MORSE_HINT)
+#define IS_MORSE(k) ((k) >= KC_MORSE_DOT && (k) <= KC_MORSE_LED)
 #define KC_BOOT 0x7F00             // vao bootloader UF2
 #define CYC_N 6                    // &LYN chi di vong qua layer 0..5 (layer 6 = FN bi bo qua)
 #define TAP_TERM 200
@@ -178,6 +180,8 @@ static uint16_t pressed[NK], tap, q[QN], lat, mgh[NK]; static uint8_t qh, qt, ta
 static bool dirty, latch_wait;
 static uint32_t act_ms;
 static morse_t mrs;   // trang thai go Morse
+static uint8_t morse_led_on = MORSE_LED_DEF, mled_dash, mled_kick;   // den bao Morse: bat/tat, lan bam cuoi la gach, yeu cau led_task cap nhat ngay
+static uint32_t mled_tp, mled_ta;   // thoi diem bam cuoi / thoi diem chot gan nhat (ms)
 static void qpush_raw(uint16_t k) { if ((uint8_t)(qh - qt) < QN) q[qh++ & (QN - 1)] = k; }
 static void morse_key(uint16_t kc);
 static void mcommit(void);
@@ -237,9 +241,11 @@ static void led_task(uint32_t now) {
   bool pw = vb_cache || LD(LD_BAT);
   int ind = 0; for (int l = CYC_N - 1; l >= 0; l--) if (l == 0 || (layers >> l & 1)) { ind = l; break; }
   if (ind != last_ind) { last_ind = ind; if (LD(LD_IND) && pw && now > 3000 && ind < NLED) { blink = ind; bstep = 0; nt = now; } }
+  if (mled_kick) { mled_kick = 0; nt = now; }   // vua go Morse: cap nhat den ngay, khong cho het buoc hieu ung
   if ((int32_t)(now - nt) < 0) return;
   if (!pw) { led_apply(0); nt = now + 500; return; }
   if (blink >= 0) { led_apply(bstep % 2 == 0 ? 1u << blink : 0); if (++bstep >= 6) { blink = -1; tick = 0; } nt = now + 150; return; }
+  if (morse_led_on) { uint8_t f = morse_led_frame(mrs.len, mled_dash, now - mled_tp, now - mled_ta); if (f != MORSE_LED_NONE) { led_apply(f); nt = now + 20; return; } }   // den bao go Morse de len hieu ung
   led_apply(led_frame(LD(LD_MODE), tick++)); nt = now + LD(LD_TICK);
 }
 
@@ -309,11 +315,12 @@ static void mq_bs(void) { qpush_raw(0x2A); }                                    
 static void mq_put(char c) { uint16_t k = mc_ascii((uint8_t)c); if (k) qpush_raw(k); }    // ky tu moi (Shift neu can: ? ! @ ...)
 static uint8_t mq_room(void) { return QN - (uint8_t)(qh - qt); }
 static const morse_io MQIO = { mq_bs, mq_put, mq_room };
-static void mcommit(void) { if (mrs.hint) mgate = 1; morse_commit_io(&mrs, &MQIO); }   // chot: xoa goi y khoi van ban (phim thuong cho sau BS nho mgate)
+static void mcommit(void) { if (mrs.len) { mled_ta = millis(); mled_kick = 1; } if (mrs.hint) mgate = 1; morse_commit_io(&mrs, &MQIO); }   // chot: xoa goi y khoi van ban (phim thuong cho sau BS nho mgate)
 static void morse_key(uint16_t kc) {
   if (kc == KC_MORSE_HINT) { morse_set_hint(&mrs, !morse_hint_on, &MQIO); return; }   // hang doi het cho -> khong doi gi
+  if (kc == KC_MORSE_LED) { morse_led_on = !morse_led_on; mled_kick = 1; return; }
   if (kc == KC_MORSE_OK) { mcommit(); return; }
-  morse_press(&mrs, kc == KC_MORSE_DASH, &MQIO);   // ma da day 7 net hoac hang doi het cho -> bo qua, trang thai khong doi
+  if (morse_press(&mrs, kc == KC_MORSE_DASH, &MQIO)) { mled_dash = kc == KC_MORSE_DASH; mled_tp = millis(); mled_ta = mled_tp - 100000u; mled_kick = 1; }   // ma da day 7 net hoac hang doi het cho -> bo qua, trang thai khong doi
 }
 static void mc_start(int id) {
   mcommit();   // macro tu go chu: khong de phim Morse ke tiep xoa nham ky tu cua macro
@@ -582,7 +589,7 @@ void setup() {
   InternalFS.begin();
   load_all();
   relayer();
-  morse_hint_on = MORSE_HINT_DEF;
+  morse_hint_on = MORSE_HINT_DEF; mled_tp = mled_ta = millis() - 100000u;
 
   TinyUSBDevice.setID(0xC1A0, 0x0021);
   TinyUSBDevice.setManufacturerDescriptor("TM");

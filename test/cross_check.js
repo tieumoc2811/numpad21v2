@@ -12,7 +12,7 @@ const check = (c, msg) => { checks++; if (!c) { fails++; console.log('FAIL: ' + 
 const eng = /\/\/ <morse-engine>([\s\S]*?)\/\/ <\/morse-engine>/.exec(html);
 if (!eng) { console.log('FAIL: khong thay <morse-engine> trong numpad21.html'); process.exit(1); }
 const pre = ['const KC_TRNS = 1;', /const CONS = [^\n]*/.exec(html)[0]].join('\n');   // dung dung dong khai bao that trong trang (MO, TL, TD, NKK, CONS)
-const js = vm.runInNewContext(pre + eng[1] + '\n({ MORSE_TAB, MORSE_MAX, MORSE_HINT_MAX, MORSE_OPT, MORSE_LAYOUT, KC_MORSE, morseNew, morseCommit, morseCommitIO, morseSetHint, morsePress, morseFind })', {});
+const js = vm.runInNewContext(pre + eng[1] + '\n({ morseLedFrame, MORSE_LED, MORSE_TAB, MORSE_MAX, MORSE_HINT_MAX, MORSE_OPT, MORSE_LAYOUT, KC_MORSE, morseNew, morseCommit, morseCommitIO, morseSetHint, morsePress, morseFind })', {});
 
 // 1) bang ma
 const cTab = [...hdr.matchAll(/\{"([.\-]+)",\s*'((?:\\.|[^'\\])+)'\}/g)].map(m => [m[2].replace(/^\\(.)$/, '$1'), m[1]]);
@@ -23,13 +23,15 @@ check(+/#define MORSE_HINT_MAX (\d+)/.exec(hdr)[1] === js.MORSE_HINT_MAX, 'MORSE
 check(+/#define MORSE_HINT_DEF (\d)/.exec(src)[1] === (js.MORSE_OPT.hint ? 1 : 0), 'goi y mac dinh: MORSE_HINT_DEF (C) != MORSE_OPT.hint (JS)');
 
 // 2) ma phim + danh muc phim cua trang
-for (const [n, k] of [['DOT', 'dot'], ['DASH', 'dash'], ['OK', 'ok'], ['HINT', 'hint']]) {
+for (const [n, k] of [['DOT', 'dot'], ['DASH', 'dash'], ['OK', 'ok'], ['HINT', 'hint'], ['LED', 'led']]) {
   const v = parseInt(new RegExp('#define KC_MORSE_' + n + ' (0x[0-9A-Fa-f]+)').exec(src)[1], 16);
   check(v === js.KC_MORSE[k], 'KC_MORSE_' + n + ' C 0x' + v.toString(16) + ' JS 0x' + js.KC_MORSE[k].toString(16));
 }
-check([0x7060, 0x7061, 0x7062, 0x7063].every(c => new RegExp('add\\(0x' + c.toString(16) + ',[^)]*\'Morse\'').test(html)), 'danh muc phim cua trang thieu ma Morse');
+check([0x7060, 0x7061, 0x7062, 0x7063, 0x7064].every(c => new RegExp('add\\(0x' + c.toString(16) + ',[^)]*\'Morse\'').test(html)), 'danh muc phim cua trang thieu ma Morse');
 check(+/#define FW_VER (\d+)/.exec(src)[1] >= 12 && /info\.ver < 12/.test(html), 'FW_VER >= 12 va trang canh bao firmware < 12');
-check(/IS_MORSE\(k\) \(\(k\) >= KC_MORSE_DOT && \(k\) <= KC_MORSE_HINT\)/.test(src) && /c <= KC_MORSE\.hint\) return true/.test(html), 'IS_MORSE (C) / hasMorse (JS) chua gom phim Goi y');
+check(/IS_MORSE\(k\) \(\(k\) >= KC_MORSE_DOT && \(k\) <= KC_MORSE_LED\)/.test(src) && /c <= KC_MORSE\.hint\) return true/.test(html), 'IS_MORSE (C) / hasMorse (JS) chua gom phim Morse');
+check(+/#define MORSE_LED_DEF (\d)/.exec(src)[1] === 1 && js.MORSE_LED.defOn === true, 'den Morse mac dinh: MORSE_LED_DEF (C) != JS');
+for (const [n, k] of [['NONE', 'none'], ['ALL', 'all'], ['DOT_MS', 'dot'], ['DASH_MS', 'dash'], ['ACK_MS', 'ack'], ['HOLD_MS', 'hold']]) check(+new RegExp('#define MORSE_LED_' + n + ' (0x[0-9A-Fa-f]+|\\d+)').exec(hdr)[1] === js.MORSE_LED[k], 'MORSE_LED_' + n + ' C != JS');
 
 // 3) bo cuc layer 3 mac dinh: C (mo[] trong defaults) == JS (MORSE_LAYOUT)
 const mo = /static const uint16_t mo\[NK\] = \{([\s\S]*?)\};/.exec(src)[1].replace(/\/\/[^\n]*/g, '');
@@ -60,6 +62,12 @@ function runStream(withHint) {
   }
   check(bad === 0, bad + ' su kien C va JS khac nhau (goi y ' + (withHint ? 'bat' : 'tat') + ')'); checks += stream.length;
   check(withHint ? maxHint === js.MORSE_HINT_MAX : maxHint === 0, 'do dai goi y lon nhat = ' + maxHint);
+}
+// 5) den LED bao Morse: C (morse_led_frame) va JS (morseLedFrame) tren cung luoi (len, dash, since_press, since_ack)
+{
+  const cOut = execFileSync(path.join(__dirname, 'build', 'morse_test'), ['--ledframes'], { maxBuffer: 1 << 28 }).toString().split('\n'); let i = 0, bad = 0;
+  for (let len = 0; len <= js.MORSE_MAX; len++) for (let d = 0; d < 2; d++) for (let sp = 0; sp < 3000; sp += 7) for (let sa = 0; sa < 400; sa += 13) { const v = js.morseLedFrame(len, !!d, sp, sa); if (+cOut[i++] !== v && bad++ < 3) console.log('FAIL: den LED len=' + len + ' dash=' + d + ' sp=' + sp + ' sa=' + sa + ': C ' + cOut[i - 1] + ' JS ' + v); checks++; }
+  check(bad === 0 && i > 10000, bad + ' khung den C va JS khac nhau (' + i + ' khung)');
 }
 runStream(false); runStream(true);
 console.log(checks + ' doi chieu C<->JS, ' + fails + ' loi');

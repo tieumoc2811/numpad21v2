@@ -98,3 +98,25 @@ static uint8_t morse_set_hint(morse_t *m, uint8_t on, const morse_io *io) {
   for (uint8_t i = 0; i < hl; i++) io->put(h[i]);
   m->hint = hl; return 1;
 }
+
+// ---------------- Den LED bao trang thai go Morse (6 den) ----------------
+// Ham THUAN: tu thoi gian da troi qua tinh ra mat na LED, firmware (numpad21.ino) va trang web (numpad21.html, morseLedFrame) dung cung cong thuc.
+//   - Vua bam cham: ca 6 den nhay ngan (80 ms). Vua bam gach: nhay dai (240 ms) -> nhin den la phan biet duoc cham / gach.
+//   - Sau do, trong luc ma dang go con do (tren 2.5 s chua bam them): thanh den = so net da go (1 net = 1 den, tu 6 net tro len = sang het).
+//   - Chot ky tu (Xong / Space / Enter / phim khac): ca 6 den nhay doi (2 x 70 ms) bao da chot.
+//   - Ngoai cac truong hop tren tra ve MORSE_LED_NONE: den chay hieu ung binh thuong.
+#define MORSE_LED_NONE 0xFF
+#define MORSE_LED_ALL 0x3F
+#define MORSE_LED_DOT_MS 80
+#define MORSE_LED_DASH_MS 240
+#define MORSE_LED_ACK_MS 70      // moi pha cua nhay doi
+#define MORSE_LED_HOLD_MS 2500   // giu thanh den bao do dai ma toi da bay nhieu ms sau lan bam cuoi
+// len = so net dang go, dash = lan bam cuoi la gach, since_press = ms tu lan bam cuoi, since_ack = ms tu lan chot gan nhat (>= 4 * ACK_MS la het nhay)
+static uint8_t morse_led_frame(uint8_t len, uint8_t dash, uint32_t since_press, uint32_t since_ack) {
+  if (since_ack < 4u * MORSE_LED_ACK_MS) return ((since_ack / MORSE_LED_ACK_MS) % 2 == 0) ? MORSE_LED_ALL : 0;
+  if (len && since_press < MORSE_LED_HOLD_MS) {
+    if (since_press < (dash ? MORSE_LED_DASH_MS : MORSE_LED_DOT_MS)) return MORSE_LED_ALL;
+    return len >= 6 ? MORSE_LED_ALL : (uint8_t)((1u << len) - 1u);
+  }
+  return MORSE_LED_NONE;
+}

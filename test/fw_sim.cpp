@@ -168,6 +168,36 @@ int main(void) {
   reset_all(); morse_hint_on = 1; to_morse_layer(); tapH(P_DOT); usb_up = false; tapk(P_DOT); pump(60); usb_up = true; pump(20); CHECK(mrs.len == 0 && mrs.hint == 0 && !mgate, "mat ket noi: Morse + goi y + mgate ve 0");
   hn = 0; host[0] = 0; tapH(P_DOT); expect("e [.i -a]", "noi lai: ky tu moi");
 
+  // ---------- DEN LED bao trang thai go Morse ----------
+  {
+    auto ledmask = []() { uint8_t m = 0; for (int i = 0; i < NLED; i++) if (!stub_pin_level[LEDP[i]]) m |= 1u << i; return m; };   // LED active-low
+    auto ledrun = [&](uint32_t ms) { for (uint32_t i = 0; i <= ms; i++) { led_task(fake_ms); if (i < ms) fake_ms++; } return ledmask(); };   // chay led_task tung ms, tra mat na luc cuoi
+    reset_all(); to_morse_layer(); vb_cache = true; LD(LD_MODE) = 1; LD(LD_TICK) = 100; LD(LD_IND) = 0; morse_led_on = MORSE_LED_DEF; mled_kick = 0; mled_tp = mled_ta = fake_ms - 100000u;
+    CHECK(MORSE_LED_DEF == 1 && IS_MORSE(KC_MORSE_LED) && !IS_MORSE(KC_MORSE_LED + 1), "hang so den Morse");
+    fake_ms += 3000; CHECK(ledrun(0) == 0, "hieu ung 'tat het' luc dau: den tat");
+    morse_key(KC_MORSE_DOT); CHECK(ledrun(0) == 0x3F, "cham: nhay ngay (%x)", ledmask()); CHECK(ledrun(30) == 0x3F, "cham: con nhay luc +30 ms"); CHECK(ledrun(70) == 0x01, "cham: +100 ms thanh 1 den (%x)", ledmask());
+    morse_key(KC_MORSE_DASH); CHECK(ledrun(0) == 0x3F, "gach: nhay ngay"); CHECK(ledrun(150) == 0x3F, "gach: con nhay luc +150 ms (dai hon cham)"); CHECK(ledrun(110) == 0x03, "gach: +260 ms thanh 2 den (%x)", ledmask());
+    morse_key(KC_MORSE_OK); CHECK(mrs.len == 0, "Xong chot"); CHECK(ledrun(0) == 0x3F, "chot: nhay doi pha 1"); CHECK(ledrun(80) == 0, "chot: pha tat"); CHECK(ledrun(80) == 0x3F, "chot: pha sang 2"); CHECK(ledrun(140) == 0, "chot: het nhay, tra lai hieu ung (tat het)");
+    morse_key(KC_MORSE_DOT); ledrun(500); CHECK(ledrun(0) == 0x01, "giu thanh den luc +500 ms"); CHECK(ledrun(2100) == 0, "qua 2.5 s khong bam them: tra lai hieu ung (ma van dang go: len=%d)", mrs.len); CHECK(mrs.len == 1, "ma van con khi den het bao");
+    mcommit(); ledrun(400);
+    morse_key(KC_MORSE_DOT); morse_key(KC_MORSE_DOT); ledrun(0); CHECK(ledrun(150) == 0x03, "2 cham: thanh 2 den"); mcommit(); ledrun(400);
+    for (int i = 0; i < 7; i++) morse_key(KC_MORSE_DASH); ledrun(0); CHECK(ledrun(300) == 0x3F && mrs.len == 7, "7 net: thanh den day (6 den)"); mcommit(); ledrun(400);
+    mcommit(); CHECK(ledrun(0) == 0, "chot khi chua go gi: khong nhay");
+    // hieu ung binh thuong van chay khi khong go Morse
+    LD(LD_MODE) = 2; ledrun(200); CHECK(ledrun(0) == 0x3F, "mode 'sang het' khi khong go Morse");
+    LD(LD_MODE) = 1; ledrun(200);
+    // tat / bat bang phim
+    morse_key(KC_MORSE_LED); CHECK(!morse_led_on, "phim Den: tat"); ledrun(30);
+    morse_key(KC_MORSE_DOT); CHECK(ledrun(0) == 0 && ledrun(100) == 0, "tat: go Morse khong lam den doi"); mcommit(); ledrun(400);
+    morse_key(KC_MORSE_LED); CHECK(morse_led_on, "phim Den: bat lai");
+    // phim vat ly -> keymap -> morse_key, va den chi sang khi co 5V USB (hoac bat 'sang ca khi chay pin')
+    reset_all(); KM(0, 1) = KC_MORSE_LED; KM(0, 2) = KC_MORSE_DOT; morse_led_on = 1; tapk(1); CHECK(!morse_led_on, "phim vat ly gan Den: tat"); tapk(1); CHECK(morse_led_on, "phim vat ly gan Den: bat");
+    reset_all(); to_morse_layer(); vb_cache = true; LD(LD_MODE) = 1; LD(LD_IND) = 0; morse_led_on = 1; mled_kick = 0; mled_tp = mled_ta = fake_ms - 100000u; ledrun(100);
+    tapk(P_DOT); CHECK(mrs.len == 1 && ledrun(0) == 0x01, "phim vat ly cham: thanh 1 den (%x)", ledmask());
+    mcommit(); ledrun(400); vb_cache = false; LD(LD_BAT) = 0; tapk(P_DOT); CHECK(ledrun(600) == 0, "chay pin (khong co 5V): den tat"); mcommit();
+    vb_cache = true;
+  }
+
   printf("%d kiem tra end-to-end, %d loi\n", checks, fails);
   return fails ? 1 : 0;
 }

@@ -878,7 +878,8 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
                 <button type="button" class="mo-k" id="moDash"><b>—</b><span>Gạch</span><kbd>2</kbd></button>
                 <button type="button" class="mo-k ok" id="moOk"><b>✓</b><span>Xong</span><kbd>3</kbd></button>
               </div>
-              <div class="tool-actions" style="margin-top:12px"><button class="btn sm" id="moSpace">Space</button><button class="btn sm" id="moBs">⌫ Backspace</button><button class="btn sm" id="moEnter">Enter</button><button class="btn sm" id="moCaps">Caps Lock</button><button class="btn sm" id="moHint" title="Bật / tắt gợi ý ngay trên văn bản">Gợi ý</button><button class="btn sm danger" id="moClear">Xoá hết</button></div>
+              <div class="mo-led"><small class="muted" style="font:600 8.5px/1 var(--mono);letter-spacing:.8px;text-transform:uppercase">Đèn LED trên bàn phím (xem trước)</small><div class="led-board" id="moLed" style="grid-template-columns:repeat(6,1fr);max-width:240px;margin:10px 0 6px"></div><p class="hint" id="moLedNote" style="margin:0"></p></div>
+              <div class="tool-actions" style="margin-top:12px"><button class="btn sm" id="moSpace">Space</button><button class="btn sm" id="moBs">⌫ Backspace</button><button class="btn sm" id="moEnter">Enter</button><button class="btn sm" id="moCaps">Caps Lock</button><button class="btn sm" id="moHint" title="Bật / tắt gợi ý ngay trên văn bản">Gợi ý</button><button class="btn sm" id="moLedBtn" title="Bật / tắt đèn LED báo Morse">Đèn LED</button><button class="btn sm danger" id="moClear">Xoá hết</button></div>
               <div class="mo-log" id="moLog" aria-label="Các phím gửi sang máy tính"></div>
               <p class="hint">Dòng dưới cùng là những gì bàn phím gửi sang máy tính: <b>⌫</b> là Backspace xoá ký tự tạm trước khi hiện ký tự mới. Phím Space / Backspace / Enter cũng chốt ký tự đang gõ, giống firmware. Nút <b>Gợi ý</b> bật / tắt phần <code>[.i -a]</code> gõ thêm sau ký tự (thêm chấm ra <b>i</b>, thêm gạch ra <b>a</b>), phần này tự xoá ở lần bấm kế tiếp hoặc khi chốt; trên bàn phím thật dùng phím Morse <b>Gợi ý</b> (nhóm Morse trong hộp chọn phím).</p>
             </div></div>
@@ -896,6 +897,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
               <div class="tool-actions" style="margin-top:12px"><button class="btn primary" id="moApply3">Gán 3 phím này</button><button class="btn" id="moApplyFull">Bố cục Morse đầy đủ → Layer 3</button></div>
               <p class="hint">«Gán 3 phím này» chỉ đổi 3 vị trí đã chọn trong layer đã chọn. «Bố cục đầy đủ» ghi đè phím của layer 3 (nút layer nhỏ và FN giữ nguyên): hàng 5 <span class="kbd">1</span> chấm · <span class="kbd">2</span> gạch · <span class="kbd">3</span> xong, <span class="kbd">+</span> Backspace · <span class="kbd">ENTER</span> Enter · <span class="kbd">0</span> Space · <span class="kbd">.</span> Gợi ý, hàng 2: <span class="kbd">/</span> Caps Lock · <span class="kbd">*</span> giữ Shift, <span class="kbd">ESC</span> = về layer 0. Xong nhớ bấm «Lưu vào bàn phím».</p>
               <p class="hint"><b>Gán vào phím bất kỳ, layer bất kỳ:</b> tab Bàn phím → chọn phím → nhóm <b>Morse</b> (Chấm / Gạch / Xong / Gợi ý). Các phím có thể nằm ở các layer khác nhau, cũng đặt được vào Tap dance (bấm / giữ / bấm 2 lần) hoặc kết quả Combo.</p>
+              <p class="hint"><b>Đèn LED báo Morse:</b> 6 đèn của bàn phím cho biết bạn đang gõ gì. Bấm <b>chấm</b> đèn nháy ngắn, bấm <b>gạch</b> đèn nháy dài; sau đó thanh đèn sáng bằng số nét đã gõ (6 nét trở lên là sáng hết) và giữ khoảng 2,5 giây; <b>chốt ký tự</b> (Xong / Space / Enter…) đèn nháy đôi. Phím Morse <b>Đèn Morse</b> (nhóm Morse trong hộp chọn phím) bật / tắt tính năng này; mặc định bật, không lưu flash, chỉ sáng khi có 5V USB hoặc đã bật «Sáng cả khi chạy pin». Cần firmware có phím <span class="kbd">0x7064</span>.</p>
             </div></div>
           </div>
           <div class="mo-col">
@@ -1006,7 +1008,7 @@ for (let i = 0; i < 32; i++) add(0x7100 + i, 'M' + (i + 1), 'Macro', 'Macro ' + 
 add(0x7030, 'OutTog', 'Kết nối', 'USB⇄BLE'); add(0x7031, 'OutUSB', 'Kết nối', 'Dùng USB'); add(0x7032, 'OutBLE', 'Kết nối', 'Dùng BLE'); add(0x7033, 'BtClr', 'Kết nối', 'Xóa ghép đôi');
 for (let i = 0; i < 5; i++) add(0x7040 + i, 'BT' + (i + 1), 'Kết nối', 'BT ' + (i + 1));
 add(0x7010, 'LedNext', 'Kết nối', 'LED +'); add(0x7011, 'LedPrev', 'Kết nối', 'LED −'); add(0x7F00, 'Boot', 'Kết nối', 'Bootloader');
-add(0x7060, 'Morse Chấm', 'Morse', '• Chấm'); add(0x7061, 'Morse Gạch', 'Morse', '— Gạch'); add(0x7062, 'Morse Xong', 'Morse', '✓ Xong'); add(0x7063, 'Morse Gợi ý', 'Morse', '? Gợi ý');
+add(0x7060, 'Morse Chấm', 'Morse', '• Chấm'); add(0x7061, 'Morse Gạch', 'Morse', '— Gạch'); add(0x7062, 'Morse Xong', 'Morse', '✓ Xong'); add(0x7063, 'Morse Gợi ý', 'Morse', '? Gợi ý'); add(0x7064, 'MorseLed', 'Morse', 'Đèn Morse');
 const BYCODE = new Map(CAT.map(e => [e.c, e])), BYNAME = new Map(CAT.map(e => [e.n.toLowerCase(), e.c]));
 const hex = n => '0x' + n.toString(16).toUpperCase();
 function label(c) {
@@ -1521,7 +1523,7 @@ const MORSE_TAB = [   // [ký tự, mã] — cùng thứ tự với MORSE_TAB tr
   [".", ".-.-.-"], [",", "--..--"], ["?", "..--.."], ["'", ".----."], ["!", "-.-.--"], ["/", "-..-."], ["(", "-.--."], [")", "-.--.-"], ["&", ".-..."],
   [":", "---..."], [";", "-.-.-."], ["=", "-...-"], ["+", ".-.-."], ["-", "-....-"], ["_", "..--.-"], ["\"", ".-..-."], ["$", "...-..-"], ["@", ".--.-."]
 ];
-const KC_MORSE = { dot: 0x7060, dash: 0x7061, ok: 0x7062, hint: 0x7063 };
+const KC_MORSE = { dot: 0x7060, dash: 0x7061, ok: 0x7062, hint: 0x7063, led: 0x7064 };
 const MORSE_HINT_MAX = 8;   // " [.i -a]"
 const MORSE_OPT = { hint: true };   // bật gợi ý trên văn bản — mặc định giống MORSE_HINT_DEF trong numpad21.ino
 // Bố cục layer 3 mặc định (giống mo[] trong defaults() của numpad21.ino): 22 vị trí theo thứ tự phím (xem PNAME), vị trí 21 = nút layer nhỏ
@@ -1557,11 +1559,21 @@ function morseSetHint(m, on, io) {
   if (io.room() < 2 * h.length) return 0;
   MORSE_OPT.hint = true; for (const c of h) io.put(c); m.hint = h.length; return 1;
 }
+// Đèn LED báo Morse — giống morse_led_frame() trong morse.h: cùng công thức, test/cross_check.js so từng khung hình với bản C.
+const MORSE_LED = { none: 0xFF, all: 0x3F, dot: 80, dash: 240, ack: 70, hold: 2500, defOn: true };
+function morseLedFrame(len, dash, sincePress, sinceAck) {
+  if (sinceAck < 4 * MORSE_LED.ack) return Math.floor(sinceAck / MORSE_LED.ack) % 2 === 0 ? MORSE_LED.all : 0;
+  if (len && sincePress < MORSE_LED.hold) {
+    if (sincePress < (dash ? MORSE_LED.dash : MORSE_LED.dot)) return MORSE_LED.all;
+    return len >= 6 ? MORSE_LED.all : (1 << len) - 1;
+  }
+  return MORSE_LED.none;
+}
 // </morse-engine>
 const hasMorse = l => { for (let p = 0; p < NK; p++) { const c = w[K(l, p)]; if (c >= KC_MORSE.dot && c <= KC_MORSE.hint) return true; } return false; };
 // ----- Morse -----
 const MO_GROUPS = [['Chữ cái', c => /[a-z]/.test(c)], ['Chữ số', c => /[0-9]/.test(c)], ['Dấu câu', c => !/[a-z0-9]/.test(c)]];
-const mo = { m: morseNew(), text: '', caps: false, log: [] };
+const mo = { m: morseNew(), text: '', caps: false, log: [], led: MORSE_LED.defOn, dash: false, tp: -1e9, ta: -1e9 };
 const moIO = {
   room: () => 99,
   bs() { mo.text = mo.text.slice(0, -1); mo.log.push('⌫'); },
@@ -1569,17 +1581,20 @@ const moIO = {
 };
 const glyph = code => '<span class="mo-g">' + [...code].map(c => '<i class="' + (c === '.' ? 'd' : 'h') + '"></i>').join('') + '</span>';
 function moEvent(ev) {
+  const hadCode = mo.m.code.length > 0;
   if (ev === 'dot' || ev === 'dash') moPressOne(ev === 'dash');
   else if (ev === 'ok') morseCommitIO(mo.m, moIO);
   else if (ev === 'hint') morseSetHint(mo.m, !MORSE_OPT.hint, moIO);
   else if (ev === 'space') { morseCommitIO(mo.m, moIO); mo.text += ' '; mo.log.push('␣'); }
   else if (ev === 'enter') { morseCommitIO(mo.m, moIO); mo.text += '\n'; mo.log.push('↵'); }
   else if (ev === 'bs') { morseCommitIO(mo.m, moIO); mo.text = mo.text.slice(0, -1); mo.log.push('⌫'); }
+  else if (ev === 'led') mo.led = !mo.led;
   else if (ev === 'clear') { morseCommit(mo.m); mo.text = ''; mo.log = []; }   // xoá hết: bỏ cả văn bản nên không cần xoá gợi ý riêng
+  if (hadCode && !mo.m.code.length && ev !== 'clear') mo.ta = performance.now();   // vừa chốt ký tự: đèn nháy đôi
   if (mo.log.length > 40) mo.log = mo.log.slice(-40);
   renderMorseSim();
 }
-function moPressOne(dash) { morsePress(mo.m, dash, moIO); }
+function moPressOne(dash) { if (morsePress(mo.m, dash, moIO)) { mo.dash = !!dash; mo.tp = performance.now(); mo.ta = -1e9; } }
 function renderMorseSim() {
   const code = mo.m.code, cur = mo.m.shown ? morseFind(code) : '';
   $('#moText').textContent = mo.text; $('#moScreen').classList.toggle('has', !!mo.text || !!code);
@@ -1592,8 +1607,16 @@ function renderMorseSim() {
   }
   $('#moNext').innerHTML = nx.join('') || '<span class="hint" style="margin:0">bấm Xong để chốt</span>';
   $('#moLog').innerHTML = mo.log.map(c => '<i class="' + (c === '⌫' ? 'bs' : '') + '">' + esc(c) + '</i>').join('');
-  $('#moCaps').classList.toggle('active', mo.caps); $('#moHint').classList.toggle('active', MORSE_OPT.hint);
+  $('#moCaps').classList.toggle('active', mo.caps); $('#moHint').classList.toggle('active', MORSE_OPT.hint); $('#moLedBtn').classList.toggle('active', mo.led);
   $$('#moTable .mo-cell').forEach(b => { const c = b.dataset.code; b.classList.toggle('hit', !!code && c.startsWith(code)); b.classList.toggle('exact', !!code && c === code); });
+}
+function drawMoLed() {   // xem trước 6 đèn: chạy đúng công thức của firmware
+  if (view !== 'morse') return;
+  const now = performance.now(), f = mo.led ? morseLedFrame(mo.m.code.length, mo.dash, now - mo.tp, now - mo.ta) : MORSE_LED.none, el = $('#moLed');
+  if (el.children.length !== 6) el.innerHTML = '<div class="led-dot"></div>'.repeat(6);
+  const bits = f === MORSE_LED.none ? 0 : f; [...el.children].forEach((d, i) => d.classList.toggle('on', !!(bits >> i & 1)));
+  const msg = !mo.led ? 'Đã tắt đèn báo Morse: đèn chạy hiệu ứng bình thường.' : f === MORSE_LED.none ? 'Chờ bạn gõ… (đèn đang chạy hiệu ứng bình thường)' : 'Đèn đang báo Morse.';
+  if ($('#moLedNote').textContent !== msg) $('#moLedNote').textContent = msg;
 }
 function renderMorseTable() {
   $('#moTable').innerHTML = MO_GROUPS.map(g => '<div class="mo-sec">' + g[0] + '</div><div class="mo-tab">' + MORSE_TAB.filter(t => g[1](t[0])).map(t => '<button type="button" class="mo-cell" data-code="' + t[1] + '" title="' + esc(t[1].replace(/\./g, '•').replace(/-/g, '—')) + '"><b>' + esc(t[0]) + '</b>' + glyph(t[1]) + '</button>').join('') + '</div>').join('');
@@ -1654,7 +1677,7 @@ async function moApplyFull() {
 function bindMorse() {
   renderMorseTable(); renderMorseSim();
   const press = (id, ev) => { const b = $(id); b.onclick = () => { moEvent(ev); $('#moScreen').focus(); }; };
-  press('#moDot', 'dot'); press('#moDash', 'dash'); press('#moOk', 'ok'); press('#moSpace', 'space'); press('#moBs', 'bs'); press('#moEnter', 'enter'); press('#moClear', 'clear'); press('#moHint', 'hint');
+  press('#moDot', 'dot'); press('#moDash', 'dash'); press('#moOk', 'ok'); press('#moSpace', 'space'); press('#moBs', 'bs'); press('#moEnter', 'enter'); press('#moClear', 'clear'); press('#moLedBtn', 'led'); setInterval(drawMoLed, 40); press('#moHint', 'hint');
   $('#moCaps').onclick = () => { mo.caps = !mo.caps; renderMorseSim(); };
   $('#moTable').onclick = e => { const b = e.target.closest('.mo-cell'); if (b) moTypeCode(b.dataset.code); };
   const map = { '1': 'dot', '.': 'dot', '2': 'dash', '-': 'dash', '3': 'ok', ' ': 'space', Enter: 'enter', Backspace: 'bs' };

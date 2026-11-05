@@ -25,3 +25,19 @@ Port tu Macropad15 (RP2350). Logic thuan C trong `firmware/numpad21/morse.h`, du
 - Tap dance: khi bam phim khac luc tap dance dang cho, tap dance duoc chot NGAY theo thu tu bam (truoc day tre 200 ms nen "Xong" co the chay sau "Cham" -> `.` sau Xong ra `i` thay vi `e`). Thay doi nay ap dung cho moi tap dance, khong chi Morse.
 - Khac Macropad15: khong co OLED (khong hien `E .` / `OK`), khong co encoder.
 - Kiem thu: `sh test/run_tests.sh` (gcc + g++ + node): test don vi/fuzz `morse.h`, mo phong end-to-end chinh `numpad21.ino` (stub Arduino / Bluefruit / TinyUSB), doi chieu C <-> JS (`numpad21.html`) tren 120000 su kien.
+
+## Den LED bao khi go Morse (them vao FW_VER 12)
+6 den LED cua ban phim hien trang thai dang go (thay cho man hinh OLED cua Macropad15):
+
+| Su kien | Den |
+|---|---|
+| bam **Cham** | ca 6 den nhay ngan (80 ms) |
+| bam **Gach** | ca 6 den nhay dai (240 ms) |
+| sau do (chua chot, duoi 2,5 s khong bam them) | thanh den = so net da go (1 net = 1 den, tu 6 net tro len = sang het) |
+| **chot ky tu** (Xong / Space / Enter / phim khac) | ca 6 den nhay doi (2 x 70 ms) |
+| con lai | den chay hieu ung binh thuong |
+
+- Bat / tat bang phim Morse **Den** (`0x7064`, nhom Morse trong hop chon phim; dung duoc o layer bat ky, tap dance, ket qua combo). Mac dinh bat (`MORSE_LED_DEF` trong `numpad21.ino`), trang thai KHONG luu flash. Khong doi dinh dang cau hinh trong flash.
+- Van theo quy tac chung cua den: chi sang khi co 5V USB, hoac khi bat «Sang ca khi chay pin».
+- Cong thuc thuan nam trong `morse.h` (`morse_led_frame`), ban JS tuong ung la `morseLedFrame` trong `numpad21.html` (tab Morse co o xem truoc 6 den); `test/cross_check.js` so tung khung hinh C <-> JS.
+

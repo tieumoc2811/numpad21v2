@@ -48,3 +48,4 @@ Bam RESET 2 lan nhanh -> o `NICENANO` -> keo file `.uf2` vao. Firmware nap tai 0
 - Logic thuan C trong `firmware/numpad21/morse.h` (dung chung voi Macropad15); trang `numpad21.html` co tab **Morse** (o thu, bang ma, gan phim).
 - Cau hinh cu trong flash duoc giu nguyen (khong doi dinh dang): layer 3 cu van trong, vao tab Morse -> «Bo cuc Morse day du -> Layer 3» -> Luu.
 - Kiem thu: `sh test/run_tests.sh`.
+- Den LED bao khi go Morse (nhay ngan = cham, nhay dai = gach, thanh den = so net, nhay doi = chot ky tu), bat/tat bang phim Morse `Den` `0x7064`: xem `MORSE.md`.
