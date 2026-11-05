@@ -34,7 +34,7 @@ Bam RESET 2 lan nhanh -> o `NICENANO` -> keo file `.uf2` vao. Firmware nap tai 0
 
 ## Luu y
 - Neu cac phim bi dao (diode lap nguoc huong), dat `DIODE_ROW2COL` = 1 trong `board.h` (hoac `-DDIODE_ROW2COL=1`).
-- Khong co OLED / encoder / doi ten layer nhu Macropad15 (numpad21 khong co phan cung do).
+- Khong co OLED / encoder nhu Macropad15 (numpad21 khong co phan cung do). Doi ten layer co (tu FW_VER 13).
 - LED chi sang khi co 5V USB, tru khi bat "Sang ca khi chay pin" trong app.
 - VID/PID: `0xC1A0` / `0x0021` (app tim theo VID + usage page 0xFF60).
 
@@ -49,3 +49,8 @@ Bam RESET 2 lan nhanh -> o `NICENANO` -> keo file `.uf2` vao. Firmware nap tai 0
 - Cau hinh cu trong flash duoc giu nguyen (khong doi dinh dang): layer 3 cu van trong, vao tab Morse -> «Bo cuc Morse day du -> Layer 3» -> Luu.
 - Kiem thu: `sh test/run_tests.sh`.
 - Den LED bao khi go Morse (nhay ngan = cham, nhay dai = gach, thanh den = so net, nhay doi = chot ky tu), bat/tat bang phim Morse `Den` `0x7064`: xem `MORSE.md`.
+
+## FW_VER 13: 16 che do LED + ten layer
+- 16 che do LED (them: hai den chay duoi, dem nhi phan, nhip tim, chay nguoc, co vao giua, hai nua doi phien, chop ngau nhien). Phim `0x7020..0x702F` = chon thang che do 1..16; `LED +` / `LED -` doi tiep / lui. Che do doi bang phim duoc nho sau khi tat nguon (ghi flash sau 2 giay).
+- Ten layer (toi da 11 byte UTF-8 moi ten) luu o file `/n21nm` qua raw HID lenh 8 (doc) / 9 (ghi); app bam dup vao ten layer hoac nut "Doi ten". Can firmware v13.
+- Layer Morse mac dinh: ENTER = Tap dance 4 (bam 1 lan = Xong, bam 2 lan = Space, giu = Enter).

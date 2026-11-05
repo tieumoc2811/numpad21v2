@@ -28,7 +28,7 @@ for (const [n, k] of [['DOT', 'dot'], ['DASH', 'dash'], ['OK', 'ok'], ['HINT', '
   check(v === js.KC_MORSE[k], 'KC_MORSE_' + n + ' C 0x' + v.toString(16) + ' JS 0x' + js.KC_MORSE[k].toString(16));
 }
 check([0x7060, 0x7061, 0x7062, 0x7063, 0x7064].every(c => new RegExp('add\\(0x' + c.toString(16) + ',[^)]*\'Morse\'').test(html)), 'danh muc phim cua trang thieu ma Morse');
-check(+/#define FW_VER (\d+)/.exec(src)[1] >= 12 && /info\.ver < 12/.test(html), 'FW_VER >= 12 va trang canh bao firmware < 12');
+check(+/#define FW_VER (\d+)/.exec(src)[1] >= 13 && /info\.ver < 13/.test(html), 'FW_VER >= 12 va trang canh bao firmware < 12');
 check(/IS_MORSE\(k\) \(\(k\) >= KC_MORSE_DOT && \(k\) <= KC_MORSE_LED\)/.test(src) && /c <= KC_MORSE\.hint\) return true/.test(html), 'IS_MORSE (C) / hasMorse (JS) chua gom phim Morse');
 check(+/#define MORSE_LED_DEF (\d)/.exec(src)[1] === 1 && js.MORSE_LED.defOn === true, 'den Morse mac dinh: MORSE_LED_DEF (C) != JS');
 for (const [n, k] of [['NONE', 'none'], ['ALL', 'all'], ['DOT_MS', 'dot'], ['DASH_MS', 'dash'], ['ACK_MS', 'ack'], ['HOLD_MS', 'hold']]) check(+new RegExp('#define MORSE_LED_' + n + ' (0x[0-9A-Fa-f]+|\\d+)').exec(hdr)[1] === js.MORSE_LED[k], 'MORSE_LED_' + n + ' C != JS');
@@ -37,7 +37,7 @@ for (const [n, k] of [['NONE', 'none'], ['ALL', 'all'], ['DOT_MS', 'dot'], ['DAS
 const mo = /static const uint16_t mo\[NK\] = \{([\s\S]*?)\};/.exec(src)[1].replace(/\/\/[^\n]*/g, '');
 const NKc = +/#define NK (\d+)/.exec(fs.readFileSync(path.join(fwdir, 'board.h'), 'utf8'))[1];
 const sym = { 'LYN': 0x4200, 'KC_TRNS': 1, 'KC_MORSE_DOT': 0x7060, 'KC_MORSE_DASH': 0x7061, 'KC_MORSE_OK': 0x7062, 'KC_MORSE_HINT': 0x7063 };
-const cl = mo.split(',').map(t => t.trim()).filter(Boolean).map(t => { let m; if ((m = /^TL\((\d+)\)$/.exec(t))) return 0x4100 | +m[1]; if (t in sym) return sym[t]; if ((m = /^KC_LATCH \+ (\d)$/.exec(t))) return 0x7001 + +m[1]; if (/^(0x[0-9a-f]+|\d+)$/i.test(t)) return Number(t); throw new Error('token la trong mo[]: ' + t); });
+const cl = mo.split(',').map(t => t.trim()).filter(Boolean).map(t => { let m; if ((m = /^TL\((\d+)\)$/.exec(t))) return 0x4100 | +m[1]; if ((m = /^TD\((\d+)\)$/.exec(t))) return 0x5000 | +m[1]; if (t in sym) return sym[t]; if ((m = /^KC_LATCH \+ (\d)$/.exec(t))) return 0x7001 + +m[1]; if (/^(0x[0-9a-f]+|\d+)$/i.test(t)) return Number(t); throw new Error('token la trong mo[]: ' + t); });
 check(cl.length === NKc && js.MORSE_LAYOUT.length === NKc && NKc === 22, 'mo[] co ' + cl.length + ' phan tu, NK = ' + NKc);
 check(cl.every((v, i) => v === js.MORSE_LAYOUT[i]), 'bo cuc layer 3: C ' + JSON.stringify(cl.map(x => x.toString(16))) + ' != JS ' + JSON.stringify(js.MORSE_LAYOUT.map(x => x.toString(16))));
 check(/KM\(3, i\) = mo\[i\]/.test(src) && /w\[K\(3, i\)\] = MORSE_LAYOUT\[i\]/.test(html), 'defaults() cua C hoac JS chua dat layer 3 = bo cuc Morse');
@@ -68,6 +68,16 @@ function runStream(withHint) {
   const cOut = execFileSync(path.join(__dirname, 'build', 'morse_test'), ['--ledframes'], { maxBuffer: 1 << 28 }).toString().split('\n'); let i = 0, bad = 0;
   for (let len = 0; len <= js.MORSE_MAX; len++) for (let d = 0; d < 2; d++) for (let sp = 0; sp < 3000; sp += 7) for (let sa = 0; sa < 400; sa += 13) { const v = js.morseLedFrame(len, !!d, sp, sa); if (+cOut[i++] !== v && bad++ < 3) console.log('FAIL: den LED len=' + len + ' dash=' + d + ' sp=' + sp + ' sa=' + sa + ': C ' + cOut[i - 1] + ' JS ' + v); checks++; }
   check(bad === 0 && i > 10000, bad + ' khung den C va JS khac nhau (' + i + ' khung)');
+}
+// 6) 16 che do LED: C (led_frame) va JS (ledFrame), tru 2 che do ngau nhien (8, 16: chi kiem tra tap hop gia tri hop le)
+{
+  const le = /\/\/ <led-engine>([\s\S]*?)\/\/ <\/led-engine>/.exec(html);
+  check(!!le, 'khong thay <led-engine> trong numpad21.html');
+  const lj = vm.runInNewContext(le[1] + '\n({ ledFrame, NLED })', { Math });
+  const cOut = execFileSync(path.join(__dirname, 'build', 'fw_sim'), [], { env: { LEDFRAMES: '1' }, maxBuffer: 1 << 24 }).toString().split('\n'); let i = 0, bad = 0;
+  check(+/#define NFX (\d+)/.exec(src)[1] === 16 && /const FX = \[/.test(html), 'NFX (C) != 16');
+  for (let m = 1; m <= 16; m++) for (let t = 0; t < 200; t++) { const c = +cOut[i++], j = lj.ledFrame(m, t); checks++; if (m === 8) { if (c > 63 || j > 63) bad++; } else if (m === 16) { if (!c || (c & (c - 1)) || c > 63 || !j || (j & (j - 1)) || j > 63) bad++; } else if (c !== j && bad++ < 3) console.log('FAIL: den LED mode ' + m + ' t=' + t + ': C ' + c + ' JS ' + j); }
+  check(bad === 0, bad + ' khung den LED C va JS khac nhau');
 }
 runStream(false); runStream(true);
 console.log(checks + ' doi chieu C<->JS, ' + fails + ' loi');

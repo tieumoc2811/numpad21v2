@@ -20,11 +20,11 @@ using namespace Adafruit_LittleFS_Namespace;
 #define LDB (NLI + 1)              // khoi LED
 #define NLD 4
 #define NW (LDB + NLD)
-enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..9, ms moi buoc, sang ca khi chay pin (0/1), nhay bao layer (0/1)
+enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..16, ms moi buoc, sang ca khi chay pin (0/1), nhay bao layer (0/1)
 #define LD(i) cfg.w[LDB + (i)]
-#define NFX 9
+#define NFX 16
 #define MAGIC 0x4E323131u
-#define FW_VER 12            // 11 = 16 layer / 32 macro, 12 = go Morse 3 phim + goi y (0x7060..0x7063)
+#define FW_VER 13            // 11 = 16 layer / 32 macro, 12 = go Morse 3 phim + goi y (0x7060..0x7063), 13 = 16 che do LED (+ phim LED 1..16) + ten layer luu trong flash (lenh 8/9)
 
 #define KC_TRNS 1
 #define CONS(x) (0x8000 | (x))
@@ -36,6 +36,7 @@ enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..9, ms moi buoc, sa
 #define KC_LATCH 0x7001            // 0x7002..0x7005 = toggle Space/Shift/Ctrl/Alt
 #define KC_LED_NEXT 0x7010
 #define KC_LED_PREV 0x7011
+#define KC_LED_SEL 0x7020          // 0x7020..0x702F = chon thang che do LED 1..16
 #define KC_OUT_TOG 0x7030          // doi USB <-> BLE
 #define KC_OUT_USB 0x7031
 #define KC_OUT_BLE 0x7032
@@ -63,6 +64,8 @@ enum { LD_MODE, LD_TICK, LD_BAT, LD_IND };   // che do LED 1..9, ms moi buoc, sa
 #define CFG_FILE "/n21cfg"
 #define MAC_FILE "/n21mac"
 #define ST_FILE "/n21st"
+#define NM_FILE "/n21nm"          // ten 16 layer: moi ten 12 byte (toi da 11 byte UTF-8 + byte 0)
+#define NML 12
 #define MAC_MAGIC 0x3143414Du
 #define ST_MAGIC 0x3154534Eu
 _Static_assert(NW < 1024, "cfg qua lon");
@@ -124,11 +127,12 @@ static void defaults(void) {
     0, 0x39, KC_LATCH + 2, 0,
     0, 0, 0,
     0, 0, 0, 0x2A,
-    KC_MORSE_DOT, KC_MORSE_DASH, KC_MORSE_OK, 0x28,
+    KC_MORSE_DOT, KC_MORSE_DASH, KC_MORSE_OK, TD(3),
     0x2C, KC_MORSE_HINT,
     LYN };
   for (int i = 0; i < NK; i++) KM(3, i) = mo[i];
   TDW(0, 0) = 0x2C; TDW(0, 1) = 0xE1; TDW(0, 2) = 0x28;
+  TDW(3, 0) = KC_MORSE_OK; TDW(3, 1) = 0x28; TDW(3, 2) = 0x2C;   // Tap dance 4 (Enter cua layer Morse): bam 1 lan = Xong, giu = Enter, bam 2 lan = Space
 }
 
 // ---------------- luu tru (LittleFS noi bo cua nRF52) ----------------
@@ -159,15 +163,19 @@ static bool file_write(const char *path, const void *buf, uint32_t n) {
   bool ok = f.write((const uint8_t *)buf, n) == n;
   f.close(); return ok;
 }
+static char lname[L][NML];   // ten layer
+static bool name_dirty;
 static uint8_t outsel;      // 0 = uu tien USB, 1 = uu tien BLE
 static uint8_t bt_slot;     // profile BLE 0..4
-static void state_save(void) { uint32_t st[2] = {ST_MAGIC, (uint32_t)outsel | (uint32_t)bt_slot << 8}; file_write(ST_FILE, st, sizeof st); }
+static void state_save(void) { uint32_t st[2] = {ST_MAGIC, (uint32_t)outsel | (uint32_t)bt_slot << 8 | (uint32_t)(uint8_t)LD(LD_MODE) << 16}; file_write(ST_FILE, st, sizeof st); }   // che do LED o day de doi bang phim khong ghi nham cau hinh app chua luu
 static void load_all(void) {
   if (!file_read(CFG_FILE, &cfg, sizeof cfg) || cfg.magic != MAGIC) defaults();
   uint32_t mg = 0;
   if (!file_read(MAC_FILE, macimg, sizeof macimg)) mac_defaults(); else { memcpy(&mg, macimg, 4); if (mg != MAC_MAGIC) mac_defaults(); }
+  memset(lname, 0, sizeof lname);
+  if (file_read(NM_FILE, lname, sizeof lname)) for (int l = 0; l < L; l++) lname[l][NML - 1] = 0; else memset(lname, 0, sizeof lname);
   uint32_t st[2] = {0, 0};
-  if (file_read(ST_FILE, st, sizeof st) && st[0] == ST_MAGIC) { outsel = st[1] & 1; bt_slot = (st[1] >> 8) % NBT; }
+  if (file_read(ST_FILE, st, sizeof st) && st[0] == ST_MAGIC) { outsel = st[1] & 1; bt_slot = (st[1] >> 8) % NBT; uint8_t lm = st[1] >> 16; if (lm >= 1 && lm <= NFX) LD(LD_MODE) = lm; }
   if (LD(LD_MODE) < 1 || LD(LD_MODE) > NFX || LD(LD_TICK) < 20 || LD(LD_TICK) > 2000) { LD(LD_MODE) = 2; LD(LD_TICK) = 100; }
   if (cfg.w[NLI] < 1 || cfg.w[NLI] > L) cfg.w[NLI] = 7;
 }
@@ -221,6 +229,8 @@ static uint32_t rnd = 0x1234ABCDu;
 static uint32_t xorshift(void) { rnd ^= rnd << 13; rnd ^= rnd >> 17; rnd ^= rnd << 5; return rnd; }
 static uint8_t led_frame(uint8_t mode, uint32_t t) {
   static const uint8_t burst[8] = {0x0C, 0x1E, 0x3F, 0x33, 0x21, 0x00, 0x00, 0x00};
+  static const uint8_t pulse[8] = {0x3F, 0x00, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00};
+  static const uint8_t implode[8] = {0x21, 0x33, 0x3F, 0x1E, 0x0C, 0x00, 0x00, 0x00};
   const uint8_t M = (1u << NLED) - 1; uint32_t p;
   switch (mode) {
     case 1: return 0;                                         // tat het
@@ -232,10 +242,19 @@ static uint8_t led_frame(uint8_t mode, uint32_t t) {
     case 7: p = t % (2 * NLED); return p < NLED ? ((1u << (p + 1)) - 1u) : ((M << (p - NLED + 1)) & M);   // day dan roi tat dan
     case 8: return xorshift() & M;                            // lap lanh ngau nhien
     case 9: return burst[t % 8];                              // no tu giua ra
+    case 10: return 3u << (t % (NLED - 1));                   // hai den chay duoi
+    case 11: return t % (M + 1u);                             // dem nhi phan 0..63
+    case 12: return pulse[t % 8];                             // nhip tim: chop doi roi nghi
+    case 13: return 1u << (NLED - 1 - t % NLED);              // chay nguoc
+    case 14: return implode[t % 8];                           // co vao giua
+    case 15: return (t % 10) < 5 ? 0x07 : 0x38;               // hai nua doi phien
+    case 16: return 1u << (xorshift() % NLED);                // chop ngau nhien 1 den
   }
   return M;
 }
-static void led_next(int d) { int m = LD(LD_MODE) + d; if (m > NFX) m = 1; if (m < 1) m = NFX; LD(LD_MODE) = m; }
+static bool led_save_req; static uint32_t led_save_t;   // doi che do LED bang phim: luu flash sau 2 giay (gom nhieu lan bam thanh 1 lan ghi)
+static void led_set(int m) { if (m < 1 || m > NFX) return; LD(LD_MODE) = m; led_save_req = true; led_save_t = ms(); }
+static void led_next(int d) { int m = LD(LD_MODE) + d; if (m > NFX) m = 1; if (m < 1) m = NFX; led_set(m); }
 static void led_task(uint32_t now) {
   static uint32_t nt, tick; static int blink = -1, last_ind; static uint8_t bstep;
   bool pw = vb_cache || LD(LD_BAT);
@@ -450,6 +469,7 @@ static void fire(int p, uint16_t kc) {
   if (kc > KC_LATCH && kc <= KC_LATCH + 4) { tg ^= 1 << (kc - KC_LATCH - 1); dirty = true; return; }
   if (kc == KC_BOOT) { enterUf2Dfu(); return; }
   if (kc == KC_LED_NEXT || kc == KC_LED_PREV) { led_next(kc == KC_LED_NEXT ? 1 : -1); return; }
+  if (kc >= KC_LED_SEL && kc < KC_LED_SEL + NFX) { led_set(kc - KC_LED_SEL + 1); return; }
   if (kc >= KC_OUT_TOG && kc <= KC_BT_CLR) { out_action(kc); return; }
   if (kc >= KC_BT_SEL && kc < KC_BT_SEL + NBT) { ble_select(kc - KC_BT_SEL); return; }
   if ((kc & 0xFF00) == KC_MACRO && (kc & 255) < NMAC) { if (!latch_wait) mc_start(kc & 255); return; }
@@ -521,6 +541,7 @@ static uint32_t scan(void) {
 
 // ---------------- Raw HID (USB): [cmd, off, n, data...] ----------------
 // 1 doc cfg (word), 2 ghi cfg, 3 luu flash, 4 mac dinh, 5 info, 6 doc macro (byte), 7 ghi macro (byte, n<=28, off cao o byte 31),
+// 8 doc ten layer (byte, n<=28), 9 ghi ten layer (12 byte/ten)
 // 11 dieu khien: byte1 = 0 USB / 1 BLE / 2 doi / 3 chon profile (byte2) / 4 xoa ghep doi / 5 vao bootloader
 static uint8_t rep[32]; static bool rep_pending, save_req;
 static volatile uint8_t rx_n; static uint8_t rx_buf[32];
@@ -544,8 +565,15 @@ static void raw_process(const uint8_t *b, uint16_t sz) {
       if (b[0] == 7 && sz >= 4 + i) macimg[4 + off + i] = b[3 + i];
       rep[3 + i] = macimg[4 + off + i];
     }
+  } else if ((b[0] == 8 || b[0] == 9) && sz >= 3 && b[2] <= 28 && off + b[2] <= L * NML) {   // ten layer (byte): 8 doc, 9 ghi
+    rep[1] = b[1]; rep[2] = b[2]; rep[31] = off >> 8;
+    uint8_t *nm = (uint8_t *)lname;
+    for (int i = 0; i < b[2]; i++) {
+      if (b[0] == 9 && sz >= 4 + i) { nm[off + i] = ((off + i) % NML == NML - 1) ? 0 : b[3 + i]; name_dirty = true; }
+      rep[3 + i] = nm[off + i];
+    }
   } else if (b[0] == 3) save_req = true;
-  else if (b[0] == 4) { defaults(); relayer(); mc_stop(); mac_defaults(); mac_dirty = true; }
+  else if (b[0] == 4) { defaults(); relayer(); mc_stop(); mac_defaults(); mac_dirty = true; memset(lname, 0, sizeof lname); name_dirty = true; }
   else if (b[0] == 11 && sz >= 2) {
     if (b[1] == 0) out_set(0); else if (b[1] == 1) out_set(1); else if (b[1] == 2) out_set(outsel ^ 1);
     else if (b[1] == 3 && sz >= 3) ble_select(b[2]);
@@ -554,13 +582,15 @@ static void raw_process(const uint8_t *b, uint16_t sz) {
   } else if (b[0] == 5) { /* info ben duoi */ }
   if (b[0] == 5 || b[0] == 11) {
     rep[1] = L; rep[2] = NW & 255; rep[3] = NW >> 8; rep[4] = FW_VER; rep[5] = NFX; rep[6] = NMAC; rep[7] = MSLOT & 255; rep[8] = MSLOT >> 8;
-    rep[9] = NK; rep[10] = outsel; rep[11] = bt_slot; rep[12] = ble_conn; rep[13] = usb_ok(); rep[14] = transport(); rep[15] = vbus();
+    rep[9] = NK; rep[10] = outsel; rep[11] = bt_slot; rep[12] = ble_conn; rep[13] = usb_ok(); rep[14] = transport(); rep[15] = vbus(); rep[16] = LD(LD_MODE);
   }
   rep_pending = true;
 }
 static void save_all(void) {
   file_write(CFG_FILE, &cfg, sizeof cfg);
   if (mac_dirty) { mac_dirty = false; file_write(MAC_FILE, macimg, sizeof macimg); }
+  if (name_dirty) { name_dirty = false; file_write(NM_FILE, lname, sizeof lname); }
+  led_save_req = false;
   state_save();
 }
 
@@ -626,6 +656,7 @@ void loop() {
   if (rx_n && !rep_pending) { raw_process(rx_buf, rx_n); rx_n = 0; }
   if (rep_pending && usb_raw.ready() && usb_raw.sendReport(0, rep, 32)) rep_pending = false;
   if (save_req && !rep_pending) { save_req = false; save_all(); }
+  if (led_save_req && now - led_save_t >= 2000) { led_save_req = false; state_save(); }   // nho che do LED vua doi bang phim
 
   if (now - last_slow >= 100) {   // viec cham: quang ba BLE, ngu sau
     last_slow = now; vb_cache = vbus();

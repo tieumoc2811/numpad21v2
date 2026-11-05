@@ -42,7 +42,7 @@ bool TinyUSBDeviceClass::mounted() { return usb_up; } bool TinyUSBDeviceClass::s
 
 static int fails, checks;
 #define CHECK(c, ...) do { checks++; if (!(c)) { fails++; printf("FAIL line %d: ", __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
-static void pump(int rounds) { for (int i = 0; i < rounds; i++) { fake_ms++; hid_task(); } }
+static void pump(int rounds) { for (int i = 0; i < rounds; i++) { fake_ms++; td_task(fake_ms); hid_task(); } }
 static uint32_t down;
 static void press2(int p, int settle) { fake_ms += 10; down |= 1u << p; apply(down); if (settle) pump(60); }
 static void release2(int p, int settle) { fake_ms += 10; down &= ~(1u << p); apply(down); if (settle) pump(60); }
@@ -55,14 +55,16 @@ static void morse(const char *code, int ok) { for (; *code; code++) tapk(*code =
 static void expect(const char *want, const char *what) { CHECK(!strcmp(host, want), "%s: may tinh co '%s', mong '%s'", what, host, want); }
 static void to_morse_layer(void) { for (int i = 0; i < 3; i++) { cycle_layer(1); pump(5); } }   // nut layer nho: L0 -> L1 -> L2 -> L3
 static void tapH(int p) { press2(p, 0); pump(3); release2(p, 0); pump(400); }   // bam NGAN (nha khi goi y chua xoa xong) roi cho hang doi xa het
+static void holdEnt(void) { press2(P_ENT, 0); pump(260); release2(P_ENT, 0); pump(400); }   // giu ENTER > TAP_TERM = Enter (Tap dance 4, o giu)
 static void reset_all(void) { morse_hint_on = 0; hn = 0; host[0] = 0; memset(prevk, 0, 6); usb_up = true; ble_up = false; down = 0; tl = 0; memset(pressed, 0, sizeof pressed); defaults(); relayer(); morse_commit(&mrs); qh = qt = 0; tap = 0; tap_phase = 0; mgate = 0; memset(mgh, 0, sizeof mgh); caps = false; tds = 0; pend = -1; tg = 0; latch_wait = false; lat = 0; outsel = 0; pump(20); }
 
 int main(void) {
+  if (getenv("LEDFRAMES")) { for (int m = 1; m <= NFX; m++) for (uint32_t t = 0; t < 200; t++) printf("%d\n", led_frame(m, t)); return 0; }   // cross_check.js: so khung den C voi JS
   reset_all();
   CHECK(KM(3, P_DOT) == KC_MORSE_DOT && KM(3, P_DASH) == KC_MORSE_DASH && KM(3, P_OK) == KC_MORSE_OK && KM(3, P_HINT) == KC_MORSE_HINT, "defaults(): layer 3 chua dat phim Morse");
   CHECK(KM(3, 21) == LYN && KM(3, P_FN) == KC_TRNS && KM(0, P_FN) == MO(6), "layer 3 giu nut layer nho va FN");
   CHECK(KM(4, 19) == TL(0) && KM(5, 19) == TL(0), "layer 4, 5 van nhu cu");
-  CHECK(MORSE_HINT_DEF == 1 && FW_VER == 12 && QN == 64, "hang so");
+  CHECK(MORSE_HINT_DEF == 1 && FW_VER == 13 && NFX == 16 && QN == 64, "hang so");
   to_morse_layer();
   CHECK(res_key(P_DOT) == KC_MORSE_DOT && res_key(P_OK) == KC_MORSE_OK, "chua vao layer Morse sau 3 lan");
   CHECK(res_key(1) == 0 && res_key(8) == 0, "phim khac bi chan");
@@ -79,7 +81,7 @@ int main(void) {
   tapk(P_DOT); expect("?e", "sau Backspace la ky tu moi");
 
   reset_all(); to_morse_layer();
-  morse("....", 1); morse(".", 1); morse(".-..", 1); morse(".-..", 1); morse("---", 1); tapk(P_SPC); morse(".--", 1); morse("---", 1); morse(".-.", 1); morse(".-..", 1); morse("-..", 1); tapk(P_ENT); morse("...--", 1); morse(".--.-.", 0);
+  morse("....", 1); morse(".", 1); morse(".-..", 1); morse(".-..", 1); morse("---", 1); tapk(P_SPC); morse(".--", 1); morse("---", 1); morse(".-.", 1); morse(".-..", 1); morse("-..", 1); holdEnt(); morse("...--", 1); morse(".--.-.", 0);
   expect("hello world\n3@", "cau hoan chinh");
 
   reset_all(); to_morse_layer(); tapk(P_DOT); tapk(P_SPC); tapk(P_DOT); expect("e e", "Space chot ky tu"); tapk(P_DASH); expect("e a", "khong xoa dau cach");
@@ -149,7 +151,7 @@ int main(void) {
   tapH(P_SPC); expect("u e ", "Space chot: goi y bi xoa TRUOC, roi moi ra dau cach");
   tapH(P_DOT); tapH(P_DASH); expect("u e a [.r -w]", ".-");
   tapH(P_BS); expect("u e ", "Backspace chot: xoa goi y roi xoa 'a' (khong xoa nham goi y)");
-  tapH(P_DOT); tapH(P_ENT); expect("u e e\n", "Enter chot");
+  tapH(P_DOT); holdEnt(); expect("u e e\n", "Enter chot");
   tapH(P_DOT); press2(P_SPC, 0); pump(400); release2(P_SPC, 0); pump(60); expect("u e e\ne ", "giu Space trong luc con goi y");
   reset_all(); morse_hint_on = 1; to_morse_layer(); tapH(P_DOT); press2(P_SPC, 0); pump(1); release2(P_SPC, 0); pump(400); expect("e ", "Space bam ngan luc con goi y");
   tapH(P_DOT); press2(P_BS, 0); pump(1); release2(P_BS, 0); pump(400); expect("e ", "Backspace bam ngan: xoa 'e' moi, khong xoa nham goi y");
@@ -198,6 +200,24 @@ int main(void) {
     vb_cache = true;
   }
 
-  printf("%d kiem tra end-to-end, %d loi\n", checks, fails);
+    // ---------- v13: che do LED 1..16, phim LED, ten layer, Enter = tap dance 4 ----------
+  {
+    reset_all(); to_morse_layer();
+    morse("...", 0); tapk(P_ENT); pump(400); expect("s", "Enter (TD4) bam 1 lan = Xong, khong gui gi them");
+    reset_all(); to_morse_layer(); tapk(P_ENT); pump(10); tapk(P_ENT); pump(400); expect(" ", "Enter (TD4) bam 2 lan = Space");
+    CHECK(led_frame(10, 0) == 3 && led_frame(10, 4) == 0x30 && led_frame(11, 37) == 37 && led_frame(13, 0) == 0x20 && led_frame(13, 5) == 1, "led 10/11/13");
+    CHECK(led_frame(12, 0) == 0x3F && led_frame(12, 1) == 0 && led_frame(14, 0) == 0x21 && led_frame(14, 3) == 0x1E && led_frame(15, 0) == 7 && led_frame(15, 5) == 0x38, "led 12/14/15");
+    for (int i = 0; i < 200; i++) { uint8_t f = led_frame(16, i); CHECK(f && !(f & (f - 1)) && f < 64, "led 16: dung 1 den"); }
+    for (int m = 1; m <= NFX; m++) { led_set(m); CHECK(LD(LD_MODE) == m, "led_set %d", m); }
+    reset_all(); KM(0, 1) = KC_LED_SEL + 15; KM(0, 2) = KC_LED_NEXT; KM(0, 4) = KC_LED_PREV; LD(LD_MODE) = 2;
+    tapk(1); CHECK(LD(LD_MODE) == 16, "phim LED 16 chon thang che do 16"); tapk(2); CHECK(LD(LD_MODE) == 1, "LED + tu 16 quay ve 1"); tapk(4); CHECK(LD(LD_MODE) == 16, "LED - tu 1 ve 16");
+    uint8_t r[32] = {0}; r[0] = 9; r[1] = 12; r[2] = 5; memcpy(r + 3, "Game\0", 5); raw_process(r, 32);
+    CHECK(!strcmp(lname[1], "Game") && name_dirty, "ten layer 1 sau lenh 9");
+    r[0] = 8; r[1] = 0; r[2] = 28; raw_process(r, 32); CHECK(!memcmp(rep + 3 + 12, "Game\0", 5), "lenh 8 doc lai ten layer");
+    r[0] = 9; r[1] = 0; r[2] = 28; memset(r + 3, 'x', 28); raw_process(r, 32); CHECK(lname[0][NML - 1] == 0 && lname[1][NML - 1] == 0, "byte cuoi moi ten luon la 0");
+    LD(LD_MODE) = 7; r[0] = 5; raw_process(r, 32); CHECK(rep[16] == 7, "info bao che do LED hien tai cho app");
+    r[0] = 4; raw_process(r, 32); CHECK(lname[1][0] == 0, "ve mac dinh xoa ten layer");
+  }
+printf("%d kiem tra end-to-end, %d loi\n", checks, fails);
   return fails ? 1 : 0;
 }

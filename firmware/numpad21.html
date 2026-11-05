@@ -738,6 +738,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
 .device .np .key .kn.wide.l1{font-size:30cqw}.device .np .key .kn.wide.l2{font-size:24cqw}.device .np .key .kn.wide.l3{font-size:18cqw}
 .device{padding:24px 22px 14px}.device .npboard{padding:11px 11px 14px}.np-head{height:50px}.np-knob{width:46px;height:46px}.np-knob b{font-size:12px}.np-leds{margin-top:24px}.device .np{--g:6px}
 .mac-list{max-height:560px;overflow-y:auto;padding-right:4px}
+
 /* ===== Morse ===== */
 .mo-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
 .mo-col{display:flex;flex-direction:column;gap:18px;min-width:0}
@@ -827,6 +828,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
           <div class="layerbar-top">
             <div class="layers" id="layers"></div>
             <div class="layer-actions">
+              <button class="btn sm" id="renLayer" title="Hoặc bấm đúp vào tên layer">Đổi tên</button>
               <button class="btn sm" id="addLayer">+ Layer</button>
               <button class="btn sm" id="dupLayer">Nhân bản</button>
               <button class="btn sm danger" id="delLayer">Xoá layer cuối</button>
@@ -856,13 +858,6 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
         </div>
         <div class="hint-card"><b>Macro</b> là chuỗi thao tác, mỗi dòng một bước: <span class="kbd">tap KEY</span> <span class="kbd">down KEY</span> <span class="kbd">up KEY</span> <span class="kbd">wait MS</span> <span class="kbd">type văn bản ASCII</span>. Ví dụ phím: <span class="kbd">A</span> <span class="kbd">Enter</span> <span class="kbd">LCtrl</span> <span class="kbd">S+A</span> (Shift+A) <span class="kbd">0x04</span>. Để dùng, vào tab <b>Bàn phím</b>, chọn một phím rồi chọn danh mục <b>Macro</b>. Bấm <b>Lưu vào bàn phím</b> để ghi macro.</div>
       </section>
-      <section class="view" id="view-adv">
-        <div class="adv-grid">
-          <div class="card"><div class="card-hd"><h2>Tap Dance</h2><span class="sub">Bấm · Giữ · Bấm 2 lần</span></div><div class="card-bd" id="tdList"></div></div>
-          <div class="card"><div class="card-hd"><h2>Combo</h2><span class="sub">Hai phím trong 30 ms</span></div><div class="card-bd" id="cbList"></div></div>
-        </div>
-        <div class="hint-card"><b>Tap Dance</b> cho một phím làm 3 việc: bấm nhanh, giữ lâu và bấm hai lần. Gán phím «Tap dance n» vào một vị trí ở tab Bàn phím. <b>Combo</b> ghép hai phím bấm gần nhau thành một phím kết quả; ô A để trống là tắt combo.</div>
-      </section>
       <section class="view" id="view-morse">
         <div class="mo-grid">
           <div class="mo-col">
@@ -879,7 +874,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
                 <button type="button" class="mo-k ok" id="moOk"><b>✓</b><span>Xong</span><kbd>3</kbd></button>
               </div>
               <div class="mo-led"><small class="muted" style="font:600 8.5px/1 var(--mono);letter-spacing:.8px;text-transform:uppercase">Đèn LED trên bàn phím (xem trước)</small><div class="led-board" id="moLed" style="grid-template-columns:repeat(6,1fr);max-width:240px;margin:10px 0 6px"></div><p class="hint" id="moLedNote" style="margin:0"></p></div>
-              <div class="tool-actions" style="margin-top:12px"><button class="btn sm" id="moSpace">Space</button><button class="btn sm" id="moBs">⌫ Backspace</button><button class="btn sm" id="moEnter">Enter</button><button class="btn sm" id="moCaps">Caps Lock</button><button class="btn sm" id="moHint" title="Bật / tắt gợi ý ngay trên văn bản">Gợi ý</button><button class="btn sm" id="moLedBtn" title="Bật / tắt đèn LED báo Morse">Đèn LED</button><button class="btn sm danger" id="moClear">Xoá hết</button></div>
+              <div class="tool-actions" style="margin-top:12px"><button class="btn sm" id="moSpace">Space</button><button class="btn sm" id="moBs">⌫ Backspace</button><button class="btn sm" id="moEnter" title="Bấm 1 lần = Xong, bấm 2 lần = Space">Enter (1× xong · 2× space)</button><button class="btn sm" id="moNl">Xuống dòng</button><button class="btn sm" id="moCaps">Caps Lock</button><button class="btn sm" id="moHint" title="Bật / tắt gợi ý ngay trên văn bản">Gợi ý</button><button class="btn sm" id="moLedBtn" title="Bật / tắt đèn LED báo Morse">Đèn LED</button><button class="btn sm danger" id="moClear">Xoá hết</button></div>
               <div class="mo-log" id="moLog" aria-label="Các phím gửi sang máy tính"></div>
               <p class="hint">Dòng dưới cùng là những gì bàn phím gửi sang máy tính: <b>⌫</b> là Backspace xoá ký tự tạm trước khi hiện ký tự mới. Phím Space / Backspace / Enter cũng chốt ký tự đang gõ, giống firmware. Nút <b>Gợi ý</b> bật / tắt phần <code>[.i -a]</code> gõ thêm sau ký tự (thêm chấm ra <b>i</b>, thêm gạch ra <b>a</b>), phần này tự xoá ở lần bấm kế tiếp hoặc khi chốt; trên bàn phím thật dùng phím Morse <b>Gợi ý</b> (nhóm Morse trong hộp chọn phím).</p>
             </div></div>
@@ -895,8 +890,8 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
                 <label class="field"><span>Xong</span><select class="mac-in" id="moPO"></select></label>
               </div>
               <div class="tool-actions" style="margin-top:12px"><button class="btn primary" id="moApply3">Gán 3 phím này</button><button class="btn" id="moApplyFull">Bố cục Morse đầy đủ → Layer 3</button></div>
-              <p class="hint">«Gán 3 phím này» chỉ đổi 3 vị trí đã chọn trong layer đã chọn. «Bố cục đầy đủ» ghi đè phím của layer 3 (nút layer nhỏ và FN giữ nguyên): hàng 5 <span class="kbd">1</span> chấm · <span class="kbd">2</span> gạch · <span class="kbd">3</span> xong, <span class="kbd">+</span> Backspace · <span class="kbd">ENTER</span> Enter · <span class="kbd">0</span> Space · <span class="kbd">.</span> Gợi ý, hàng 2: <span class="kbd">/</span> Caps Lock · <span class="kbd">*</span> giữ Shift, <span class="kbd">ESC</span> = về layer 0. Xong nhớ bấm «Lưu vào bàn phím».</p>
-              <p class="hint"><b>Gán vào phím bất kỳ, layer bất kỳ:</b> tab Bàn phím → chọn phím → nhóm <b>Morse</b> (Chấm / Gạch / Xong / Gợi ý). Các phím có thể nằm ở các layer khác nhau, cũng đặt được vào Tap dance (bấm / giữ / bấm 2 lần) hoặc kết quả Combo.</p>
+              <p class="hint">«Gán 3 phím này» chỉ đổi 3 vị trí đã chọn trong layer đã chọn. «Bố cục đầy đủ» ghi đè phím của layer 3 (nút layer nhỏ và FN giữ nguyên): hàng 5 <span class="kbd">1</span> chấm · <span class="kbd">2</span> gạch · <span class="kbd">3</span> xong, <span class="kbd">+</span> Backspace · <span class="kbd">ENTER</span> bấm 1 lần = Xong, bấm 2 lần = Space, giữ = Enter (Tap dance 4) · <span class="kbd">0</span> Space · <span class="kbd">.</span> Gợi ý, hàng 2: <span class="kbd">/</span> Caps Lock · <span class="kbd">*</span> giữ Shift, <span class="kbd">ESC</span> = về layer 0. Xong nhớ bấm «Lưu vào bàn phím».</p>
+              <p class="hint"><b>Gán vào phím bất kỳ, layer bất kỳ:</b> tab Bàn phím → chọn phím → nhóm <b>Morse</b> (Chấm / Gạch / Xong / Gợi ý). Các phím có thể nằm ở các layer khác nhau, và cũng đặt được trong Tap dance (bấm / giữ / bấm 2 lần) hoặc kết quả Combo (firmware v13).</p>
               <p class="hint"><b>Đèn LED báo Morse:</b> 6 đèn của bàn phím cho biết bạn đang gõ gì. Bấm <b>chấm</b> đèn nháy ngắn, bấm <b>gạch</b> đèn nháy dài; sau đó thanh đèn sáng bằng số nét đã gõ (6 nét trở lên là sáng hết) và giữ khoảng 2,5 giây; <b>chốt ký tự</b> (Xong / Space / Enter…) đèn nháy đôi. Phím Morse <b>Đèn Morse</b> (nhóm Morse trong hộp chọn phím) bật / tắt tính năng này; mặc định bật, không lưu flash, chỉ sáng khi có 5V USB hoặc đã bật «Sáng cả khi chạy pin». Cần firmware có phím <span class="kbd">0x7064</span>.</p>
             </div></div>
           </div>
@@ -904,7 +899,14 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
             <div class="card"><div class="card-hd"><h2>Bảng mã</h2><span class="sub">bấm một ô để gõ thử</span></div><div class="card-bd" id="moTable"></div></div>
           </div>
         </div>
-        <div class="hint-card"><b>Cách gõ:</b> mỗi lần bấm <b>Chấm</b> hoặc <b>Gạch</b>, ký tự tương ứng hiện ngay trên máy tính. Bấm thêm thì ký tự cũ bị xoá (Backspace) và thay bằng ký tự của mã dài hơn — ví dụ <span class="kbd">•</span> → <b>e</b>, <span class="kbd">• •</span> → <b>i</b>, <span class="kbd">• • —</span> → <b>u</b>. Mã chưa có ký tự nào (vd <span class="kbd">• • — —</span>) thì chỉ xoá, gõ tiếp là ra <b>?</b>. Bấm <b>Xong</b> để chốt ký tự và bắt đầu ký tự mới. Chữ in hoa: dùng Caps Lock hoặc giữ Shift. Mã tối đa 7 nét.</div>
+        <div class="hint-card"><b>Cách gõ:</b> mỗi lần bấm <b>Chấm</b> hoặc <b>Gạch</b>, ký tự tương ứng hiện ngay trên máy tính. Bấm thêm thì ký tự cũ bị xoá (Backspace) và thay bằng ký tự của mã dài hơn — ví dụ <span class="kbd">•</span> → <b>e</b>, <span class="kbd">• •</span> → <b>i</b>, <span class="kbd">• • —</span> → <b>u</b>. Mã chưa có ký tự nào (vd <span class="kbd">• • — —</span>) thì chỉ xoá, gõ tiếp là ra <b>?</b>. Bấm <b>Xong</b> để chốt ký tự và bắt đầu ký tự mới. Chữ in hoa: dùng Caps Lock hoặc giữ Shift (phím <span class="kbd">*</span>). Mã tối đa 7 nét.</div>
+      </section>
+      <section class="view" id="view-adv">
+        <div class="adv-grid">
+          <div class="card"><div class="card-hd"><h2>Tap Dance</h2><span class="sub">Bấm · Giữ · Bấm 2 lần</span></div><div class="card-bd" id="tdList"></div></div>
+          <div class="card"><div class="card-hd"><h2>Combo</h2><span class="sub">Hai phím trong 30 ms</span></div><div class="card-bd" id="cbList"></div></div>
+        </div>
+        <div class="hint-card"><b>Tap Dance</b> cho một phím làm 3 việc: bấm nhanh, giữ lâu và bấm hai lần. Gán phím «Tap dance n» vào một vị trí ở tab Bàn phím. <b>Combo</b> ghép hai phím bấm gần nhau thành một phím kết quả; ô A để trống là tắt combo.</div>
       </section>
       <section class="view" id="view-led">
         <div class="card led-hero">
@@ -913,6 +915,7 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
           <div class="led-stage"><div class="led-board" id="ledBoard" style="grid-template-columns:repeat(6,1fr);max-width:300px"></div></div>
         </div>
         <div class="card" style="margin-top:18px"><div class="card-hd"><h2>Hiệu ứng dây đèn</h2><span class="sub">chọn rồi bấm «Lưu vào bàn phím»</span></div><div class="card-bd"><div class="fx-grid" id="fxGrid"></div></div></div>
+        <div class="hint-card" style="margin:18px 0 0"><b>Gán chế độ đèn vào phím bất kỳ:</b> tab <b>Bàn phím</b> → chọn một phím ở layer bất kỳ → nhóm <b>Đèn LED</b>: <span class="kbd">LED 1</span> … <span class="kbd">LED 16</span> chọn thẳng chế độ, <span class="kbd">LED +</span> / <span class="kbd">LED −</span> đổi tiếp / lùi. Cũng dùng được trong Tap dance và kết quả Combo. Chế độ đổi bằng phím được nhớ sau khi tắt nguồn (firmware v13).</div>
         <div class="led-controls" style="grid-template-columns:1fr 1fr">
           <div class="card"><div class="card-hd"><h2>Tinh chỉnh</h2></div><div class="card-bd">
             <div class="slider-row"><label for="ledTick">Tốc độ</label><input type="range" id="ledTick" min="20" max="2000" step="10"><output id="ledTickV">—</output></div>
@@ -977,7 +980,93 @@ html[data-theme="light"] .toast{background:rgba(255,255,255,.97)}
 const L = 16, NK = 22, BASE_TD = L * NK, BASE_CB = BASE_TD + 12, NLI = BASE_CB + 12, LDB = NLI + 1, NLD = 4, NW = LDB + NLD;
 const KC_TRNS = 1;
 const CONS = x => 0x8000 | x, MO = n => 0x4000 | n, TLK = n => 0x4100 | n, LYN = 0x4200, TDK = n => 0x5000 | n, NKK = i => 0x6000 | i;
+// <morse-engine>
+// Thuật toán gõ Morse — PHẢI giống firmware (morse.h). test/run_tests.sh nạp đúng đoạn này và so với bản C trên chuỗi sự kiện ngẫu nhiên.
+const MORSE_MAX = 7;
+const MORSE_TAB = [   // [ký tự, mã] — cùng thứ tự với MORSE_TAB trong morse.h
+  ["a", ".-"], ["b", "-..."], ["c", "-.-."], ["d", "-.."], ["e", "."], ["f", "..-."], ["g", "--."], ["h", "...."], ["i", ".."],
+  ["j", ".---"], ["k", "-.-"], ["l", ".-.."], ["m", "--"], ["n", "-."], ["o", "---"], ["p", ".--."], ["q", "--.-"], ["r", ".-."],
+  ["s", "..."], ["t", "-"], ["u", "..-"], ["v", "...-"], ["w", ".--"], ["x", "-..-"], ["y", "-.--"], ["z", "--.."], ["0", "-----"],
+  ["1", ".----"], ["2", "..---"], ["3", "...--"], ["4", "....-"], ["5", "....."], ["6", "-...."], ["7", "--..."], ["8", "---.."], ["9", "----."],
+  [".", ".-.-.-"], [",", "--..--"], ["?", "..--.."], ["'", ".----."], ["!", "-.-.--"], ["/", "-..-."], ["(", "-.--."], [")", "-.--.-"], ["&", ".-..."],
+  [":", "---..."], [";", "-.-.-."], ["=", "-...-"], ["+", ".-.-."], ["-", "-....-"], ["_", "..--.-"], ["\"", ".-..-."], ["$", "...-..-"], ["@", ".--.-."]
+];
+const KC_MORSE = { dot: 0x7060, dash: 0x7061, ok: 0x7062, hint: 0x7063, led: 0x7064 };
+const MORSE_HINT_MAX = 8;   // " [.i -a]"
+const MORSE_OPT = { hint: true };   // bật gợi ý trên văn bản — mặc định giống MORSE_HINT_DEF trong numpad21.ino
+// Bố cục layer 3 mặc định (giống mo[] trong defaults() của numpad21.ino): 22 vị trí theo thứ tự phím (xem PNAME), vị trí 21 = nút layer nhỏ
+// ESC = về layer 0, FN giữ nguyên · hàng 2: Caps, giữ Shift · "+" Backspace · hàng 5: Chấm Gạch Xong Enter · "0" Space, "." Gợi ý
+const MORSE_LAYOUT = [TLK(0), 0, 0, 1, 0, 0x39, 0x7003, 0, 0, 0, 0, 0, 0, 0, 0x2A, KC_MORSE.dot, KC_MORSE.dash, KC_MORSE.ok, TDK(3), 0x2C, KC_MORSE.hint, LYN];   // ENTER = Tap dance 4: bấm 1 lần = Xong, bấm 2 lần = Space, giữ = Enter
+const morseFind = code => { for (const t of MORSE_TAB) if (t[1] === code) return t[0]; return ''; };
+const morseNew = () => ({ code: '', shown: false, hint: 0 });   // hint = số ký tự gợi ý đang hiện trên máy tính
+const morseCommit = m => { m.code = ''; m.shown = false; m.hint = 0; };   // chỉ đặt lại trạng thái, không gửi phím
+// Gợi ý cho mã code: " [.i -a]" = thêm chấm ra 'i', thêm gạch ra 'a' (chỉ in nhánh có ký tự).
+function morseHintStr(code) {
+  if (code.length >= MORSE_MAX) return '';
+  const b = ['.', '-'].map(x => [x, morseFind(code + x)]).filter(t => t[1]).map(t => t[0] + t[1]);
+  return b.length ? ' [' + b.join(' ') + ']' : '';
+}
+// io = { room(), bs(), put(ch) }. Trả 1 nếu nhận, 0 nếu bỏ qua (mã đã dài 7 hoặc hàng đợi phím hết chỗ) — khi bỏ qua trạng thái không đổi.
+// Gợi ý bật: xoá (ký tự tạm + gợi ý cũ), gửi ký tự mới, gửi gợi ý mới; chừa sẵn chỗ để lát nữa xoá gợi ý lúc chốt.
+function morsePress(m, dash, io) {
+  if (m.code.length >= MORSE_MAX) return 0;
+  const nc = m.code + (dash ? '-' : '.'), ch = morseFind(nc), h = MORSE_OPT.hint ? morseHintStr(nc) : '', del = (m.shown ? 1 : 0) + m.hint;
+  if (io.room() < del + (ch ? 1 : 0) + 2 * h.length) return 0;
+  for (let i = 0; i < del; i++) io.bs();
+  if (ch) io.put(ch);
+  for (const c of h) io.put(c);
+  m.code = nc; m.shown = !!ch; m.hint = h.length; return 1;
+}
+// Chốt ký tự: xoá phần gợi ý khỏi văn bản (ký tự tạm ở lại), rồi đặt lại trạng thái.
+function morseCommitIO(m, io) { for (let i = 0; i < m.hint; i++) io.bs(); morseCommit(m); }
+// Bật / tắt gợi ý (đang gõ dở thì hiện hoặc xoá gợi ý ngay). Trả 1 nếu đã đổi, 0 nếu hàng đợi phím hết chỗ.
+function morseSetHint(m, on, io) {
+  on = !!on; if (on === MORSE_OPT.hint) return 1;
+  if (!on) { if (io.room() < m.hint) return 0; for (let i = 0; i < m.hint; i++) io.bs(); m.hint = 0; MORSE_OPT.hint = false; return 1; }
+  const h = m.code ? morseHintStr(m.code) : '';
+  if (io.room() < 2 * h.length) return 0;
+  MORSE_OPT.hint = true; for (const c of h) io.put(c); m.hint = h.length; return 1;
+}
+// Đèn LED báo Morse — giống morse_led_frame() trong morse.h: cùng công thức, test/cross_check.js so từng khung hình với bản C.
+const MORSE_LED = { none: 0xFF, all: 0x3F, dot: 80, dash: 240, ack: 70, hold: 2500, defOn: true };
+function morseLedFrame(len, dash, sincePress, sinceAck) {
+  if (sinceAck < 4 * MORSE_LED.ack) return Math.floor(sinceAck / MORSE_LED.ack) % 2 === 0 ? MORSE_LED.all : 0;
+  if (len && sincePress < MORSE_LED.hold) {
+    if (sincePress < (dash ? MORSE_LED.dash : MORSE_LED.dot)) return MORSE_LED.all;
+    return len >= 6 ? MORSE_LED.all : (1 << len) - 1;
+  }
+  return MORSE_LED.none;
+}
+// </morse-engine>
+// <led-engine>
+// Bản JS của led_frame() trong firmware (6 đèn). test/cross_check.js so từng khung hình với bản C (trừ 2 chế độ ngẫu nhiên 8 và 16).
+const NLED = 6;
+function ledFrame(mode, t) {
+  const M = 63, burst = [0x0C, 0x1E, 0x3F, 0x33, 0x21, 0, 0, 0], pulse = [0x3F, 0, 0x3F, 0, 0, 0, 0, 0], implode = [0x21, 0x33, 0x3F, 0x1E, 0x0C, 0, 0, 0]; let p;
+  switch (mode) {
+    case 1: return 0;
+    case 2: return M;
+    case 3: return 1 << (t % NLED);
+    case 4: p = t % (2 * NLED - 2); return 1 << (p < NLED ? p : (2 * NLED - 2) - p);
+    case 5: return (t % 10) < 5 ? M : 0;
+    case 6: return (t % 10) < 5 ? 0x15 : 0x2A;
+    case 7: p = t % (2 * NLED); return p < NLED ? ((1 << (p + 1)) - 1) : ((M << (p - NLED + 1)) & M);
+    case 8: return Math.floor(Math.random() * 64);
+    case 9: return burst[t % 8];
+    case 10: return 3 << (t % (NLED - 1));
+    case 11: return t % (M + 1);
+    case 12: return pulse[t % 8];
+    case 13: return 1 << (NLED - 1 - t % NLED);
+    case 14: return implode[t % 8];
+    case 15: return (t % 10) < 5 ? 0x07 : 0x38;
+    case 16: return 1 << Math.floor(Math.random() * NLED);
+  }
+  return M;
+}
+// </led-engine>
 const $ = s => document.querySelector(s);
+
+const FX = [['Tắt hết', 'Không sáng đèn nào.', '#2a3140,#2a3140'], ['Sáng hết', 'Cả 6 đèn sáng liên tục.', '#7c5cff,#22d3ee'], ['Chạy đuổi', 'Một đèn chạy dọc dây.', '#22d3ee,#3ddc97'], ['Qua lại', 'Đèn chạy qua rồi quay lại.', '#7c5cff,#ff8fb1'], ['Nhấp nháy', 'Cả dây nhấp nháy.', '#ffb86b,#ff5d7a'], ['Xen kẽ', 'Đèn chẵn và lẻ đổi phiên.', '#b6ff3b,#22d3ee'], ['Dâng rồi tắt dần', 'Sáng dần từng đèn rồi tắt dần.', '#22d3ee,#7c5cff'], ['Lấp lánh', 'Các đèn nháy ngẫu nhiên.', '#ff8fb1,#ffb86b'], ['Nổ từ giữa', 'Lan từ giữa ra hai đầu.', '#ff5d7a,#ffb86b'], ['Hai đèn chạy đuổi', 'Một cặp đèn chạy dọc dây.', '#22d3ee,#7c5cff'], ['Đếm nhị phân', '6 đèn đếm từ 0 đến 63.', '#b6ff3b,#3ddc97'], ['Nhịp tim', 'Chớp đôi rồi nghỉ.', '#ff5d7a,#ff8fb1'], ['Chạy ngược', 'Một đèn chạy theo chiều ngược lại.', '#3ddc97,#22d3ee'], ['Co vào giữa', 'Sáng từ hai đầu thu vào giữa.', '#ffb86b,#7c5cff'], ['Hai nửa đổi phiên', 'Nửa trái và nửa phải thay nhau.', '#ff8fb1,#22d3ee'], ['Chớp ngẫu nhiên', 'Mỗi lần chớp một đèn bất kỳ.', '#b6ff3b,#ffb86b']];
 
 // ===== danh mục phím =====
 const CAT = []; // {c, n (tên dùng trong macro), l (nhãn hiển thị), g (nhóm)}
@@ -1007,8 +1096,10 @@ add(0x7001, 'Latch', 'Đặc biệt'); add(0x7002, 'TgSpace', 'Đặc biệt', '
 for (let i = 0; i < 32; i++) add(0x7100 + i, 'M' + (i + 1), 'Macro', 'Macro ' + (i + 1));
 add(0x7030, 'OutTog', 'Kết nối', 'USB⇄BLE'); add(0x7031, 'OutUSB', 'Kết nối', 'Dùng USB'); add(0x7032, 'OutBLE', 'Kết nối', 'Dùng BLE'); add(0x7033, 'BtClr', 'Kết nối', 'Xóa ghép đôi');
 for (let i = 0; i < 5; i++) add(0x7040 + i, 'BT' + (i + 1), 'Kết nối', 'BT ' + (i + 1));
-add(0x7010, 'LedNext', 'Kết nối', 'LED +'); add(0x7011, 'LedPrev', 'Kết nối', 'LED −'); add(0x7F00, 'Boot', 'Kết nối', 'Bootloader');
-add(0x7060, 'Morse Chấm', 'Morse', '• Chấm'); add(0x7061, 'Morse Gạch', 'Morse', '— Gạch'); add(0x7062, 'Morse Xong', 'Morse', '✓ Xong'); add(0x7063, 'Morse Gợi ý', 'Morse', '? Gợi ý'); add(0x7064, 'MorseLed', 'Morse', 'Đèn Morse');
+add(0x7010, 'LedNext', 'Đèn LED', 'LED +'); add(0x7011, 'LedPrev', 'Đèn LED', 'LED −');
+FX.forEach((f, i) => add(0x7020 + i, f[0], 'Đèn LED', 'LED ' + (i + 1)));   // chọn thẳng chế độ 1..16 (firmware v13)
+add(0x7F00, 'Boot', 'Kết nối', 'Bootloader');
+add(0x7060, 'MorseDot', 'Morse', 'Chấm'); add(0x7061, 'MorseDash', 'Morse', 'Gạch'); add(0x7062, 'MorseOk', 'Morse', 'Xong'); add(0x7063, 'MorseHint', 'Morse', 'Gợi ý'); add(0x7064, 'MorseLed', 'Morse', 'Đèn Morse');
 const BYCODE = new Map(CAT.map(e => [e.c, e])), BYNAME = new Map(CAT.map(e => [e.n.toLowerCase(), e.c]));
 const hex = n => '0x' + n.toString(16).toUpperCase();
 function label(c) {
@@ -1053,7 +1144,7 @@ function xf(b) { const p = chain.then(() => xfer(b)); chain = p.catch(() => {});
 function pkt(cmd, off, n) { const b = new Uint8Array(32); b[0] = cmd; b[1] = off & 255; b[2] = n; b[31] = off >> 8; return b; }
 async function getInfo() {
   const r = await xf(pkt(5, 0, 0));
-  info = { L: r[1], NW: r[2] | r[3] << 8, ver: r[4], nfx: r[5], nmac: r[6], mslot: r[7] | r[8] << 8, nk: r[9], out: r[10], slot: r[11], ble: r[12], usb: r[13], tr: r[14], vbus: r[15] };
+  info = { L: r[1], NW: r[2] | r[3] << 8, ver: r[4], nfx: r[5], nmac: r[6], mslot: r[7] | r[8] << 8, nk: r[9], out: r[10], slot: r[11], ble: r[12], usb: r[13], tr: r[14], vbus: r[15], led: r[16] };
   return info;
 }
 async function readAll() {
@@ -1068,12 +1159,29 @@ async function readAll() {
     mac.set(r.subarray(3, 3 + n), off);
     if ((off / 28) % 8 === 0) prog('Đọc macro ' + Math.round(50 + (off + n) * 50 / mac.length) + '%');
   }
+  await readNames();
   w0 = w.slice(); mac0 = mac.slice();
+}
+async function readNames() {   // lenh 8: doc ten 16 layer (firmware v13+)
+  LN = Array(L).fill('');
+  if (info && info.ver >= 13) {
+    const buf = new Uint8Array(L * LNL);
+    for (let off = 0; off < buf.length; off += 28) { const n = Math.min(28, buf.length - off), r = await xf(pkt(8, off, n)); buf.set(r.subarray(3, 3 + n), off); }
+    for (let l = 0; l < L; l++) { const sl = buf.subarray(l * LNL, (l + 1) * LNL), e = sl.indexOf(0); LN[l] = TD_.decode(e < 0 ? sl : sl.subarray(0, e)); }
+  }
+  LN0 = JSON.stringify(LN);
+}
+async function writeNames() {   // lenh 9: ghi ten 16 layer
+  const buf = new Uint8Array(L * LNL);
+  LN.forEach((nm, l) => buf.set(TE.encode(nm).subarray(0, LNMAX), l * LNL));
+  for (let off = 0; off < buf.length; off += 28) { const n = Math.min(28, buf.length - off), b = pkt(9, off, n); b.set(buf.subarray(off, off + n), 3); await xf(b); }
+  LN0 = JSON.stringify(LN);
 }
 async function writeAll() {
   let done = 0, total = 0;
   for (let off = 0; off < NW; off += 14) { const n = Math.min(14, NW - off); for (let i = 0; i < n; i++) if (w[off + i] !== w0[off + i]) { total++; break; } }
   for (let off = 0; off < mac.length; off += 28) { const n = Math.min(28, mac.length - off); for (let i = 0; i < n; i++) if (mac[off + i] !== mac0[off + i]) { total++; break; } }
+  if (info && info.ver >= 13 && JSON.stringify(LN) !== LN0) total++;
   for (let off = 0; off < NW; off += 14) {
     const n = Math.min(14, NW - off); let ch = false;
     for (let i = 0; i < n; i++) if (w[off + i] !== w0[off + i]) ch = true;
@@ -1088,6 +1196,7 @@ async function writeAll() {
     const b = pkt(7, off, n); b.set(mac.subarray(off, off + n), 3);
     await xf(b); prog('Ghi ' + (++done) + '/' + total);
   }
+  if (info && info.ver >= 13 && JSON.stringify(LN) !== LN0) { await writeNames(); prog('Ghi ' + (++done) + '/' + total); }
   await xf(pkt(3, 0, 0));
   w0 = w.slice(); mac0 = mac.slice();
 }
@@ -1159,8 +1268,12 @@ function hidFromEvent(e) {
   return CODE_MAP[e.code] == null ? null : CODE_MAP[e.code];
 }
 
-let loaded = false, M = [], M0 = '', hist = [], hi = -1, view = 'keymap', capturing = false, pickerOpen = false, pkCat = 'all', pkShift = false, pickInfo = null, dlgResolve = null, dlgOpen = false, macSel = 0;
-const layerLabel = l => l === 0 ? 'BASE' : l === 6 ? 'FN' : hasMorse(l) ? 'MORSE' : 'LAYER ' + l;
+let LN = Array(16).fill(''), LN0 = '', loaded = false, M = [], M0 = '', hist = [], hi = -1, view = 'keymap', capturing = false, pickerOpen = false, pkCat = 'all', pkShift = false, pickInfo = null, dlgResolve = null, dlgOpen = false, macSel = 0;
+const hasMorse = l => { for (let p = 0; p < NK; p++) { const c = w[K(l, p)]; if (c >= KC_MORSE.dot && c <= KC_MORSE.hint) return true; } return false; };
+const defLabel = l => l === 0 ? 'BASE' : l === 6 ? 'FN' : hasMorse(l) ? 'MORSE' : 'LAYER ' + l;
+const layerLabel = l => LN[l] || defLabel(l);
+const LNL = 12, LNMAX = LNL - 1, TE = new TextEncoder(), TD_ = new TextDecoder();
+const cutBytes = (s, n) => { let o = '', b = 0; for (const ch of s) { const k = TE.encode(ch).length; if (b + k > n) break; o += ch; b += k; } return o; };   // cat theo byte UTF-8, khong cat giua chu   // 12 byte/ten, byte cuoi luon la 0 -> toi da 11 byte UTF-8
 function layerColor(l) {
   const h = (l * 137) % 360, f = (h % 60) * 255 / 60, s = Math.floor(h / 60);
   const v = [[255, f, 0], [255 - f, 255, 0], [0, 255, f], [0, 255 - f, 255], [f, 0, 255], [255, 0, 255 - f]][s];
@@ -1170,7 +1283,7 @@ function catClass(c) {
   if (c === 0) return 'none'; if (c === 1) return 'trns'; if (c & 0x8000) return 'media';
   const hi_ = c & 0xFF00;
   if (hi_ === 0x4000 || hi_ === 0x4100 || hi_ === 0x4200) return 'layer';
-  if (c === 0x7010 || c === 0x7011) return 'led';
+  if (c === 0x7010 || c === 0x7011 || (c >= 0x7020 && c < 0x7030)) return 'led';
   if (c >= 0xE0 && c <= 0xE7) return 'mod';
   if (c >= 0x5000) return 'special';
   return 'std';
@@ -1206,17 +1319,17 @@ function ask(o) {
 function closeDlg(v) { if (!dlgOpen) return; dlgOpen = false; $('#dlgWrap').classList.remove('on'); document.body.classList.remove('locked'); const r = dlgResolve; dlgResolve = null; if (r) r(v); }
 
 // ----- lịch sử / trạng thái bẩn -----
-const snap = () => ({ w: w.slice(), m: JSON.stringify(M) });
+const snap = () => ({ w: w.slice(), m: JSON.stringify(M), ln: JSON.stringify(LN) });
 function resetHist() { hist = [snap()]; hi = 0; updateUndo(); }
 function commit() {
   const s = snap();
-  if (hi >= 0 && hist[hi].m === s.m && hist[hi].w.every((v, i) => v === s.w[i])) { updateUndo(); return; }
+  if (hi >= 0 && hist[hi].m === s.m && hist[hi].ln === s.ln && hist[hi].w.every((v, i) => v === s.w[i])) { updateUndo(); return; }
   hist = hist.slice(0, hi + 1); hist.push(s); if (hist.length > 80) hist.shift(); hi = hist.length - 1; updateUndo();
 }
-function restore(msg) { const s = hist[hi]; w.set(s.w); M = JSON.parse(s.m); renderAll(); toast(msg, 'ok'); }
+function restore(msg) { const s = hist[hi]; w.set(s.w); M = JSON.parse(s.m); LN = JSON.parse(s.ln); renderAll(); toast(msg, 'ok'); }
 function undo() { if (hi > 0) { hi--; restore('Đã hoàn tác'); } }
 function redo() { if (hi < hist.length - 1) { hi++; restore('Đã làm lại'); } }
-const isDirty = () => loaded && (!w.every((v, i) => v === w0[i]) || JSON.stringify(M) !== M0);
+const isDirty = () => loaded && (!w.every((v, i) => v === w0[i]) || JSON.stringify(M) !== M0 || JSON.stringify(LN) !== LN0);
 function updateDirtyUI() { const d = isDirty(); $('#dirtyPill').hidden = !d; $('#saveBtn').classList.toggle('dirty', d); }
 function updateUndo() { $('#undoBtn').disabled = hi <= 0; $('#redoBtn').disabled = hi >= hist.length - 1; }
 function changed() { commit(); renderAll(); }
@@ -1227,10 +1340,10 @@ function renderLayers() {
   for (let l = 0; l < n; l++) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'layer-chip' + (l === layer ? ' on' : ''); b.style.setProperty('--c', layerColor(l));
     b.innerHTML = '<span class="lc-dot"></span><span>' + esc(layerLabel(l)) + '</span><span class="lc-n">L' + l + '</span>';
-    b.onclick = () => { layer = l; sel = -1; renderAll(); }; wrap.append(b);
+    b.onclick = () => { layer = l; sel = -1; renderAll(); }; b.ondblclick = () => renameLayer(l); b.title = 'Bấm đúp để đổi tên'; wrap.append(b);
   }
   $('#layerCount').textContent = n + ' / ' + L + ' layer';
-  $('#addLayer').disabled = $('#dupLayer').disabled = !loaded || n >= L; $('#delLayer').disabled = !loaded || n <= 1;
+  $('#renLayer').disabled = !loaded; $('#addLayer').disabled = $('#dupLayer').disabled = !loaded || n >= L; $('#delLayer').disabled = !loaded || n <= 1;
   $('#devFoot2').textContent = n + ' layer';
 }
 function renderDevice() {
@@ -1305,272 +1418,27 @@ function assign(code) {
 }
 
 // ----- layer -----
+async function renameLayer(l) {
+  if (!loaded) { toast('Hãy kết nối bàn phím trước.', 'warn'); return; }
+  if (info && info.ver < 13) { toast('Firmware v' + info.ver + ' chưa lưu được tên layer — hãy nạp firmware v13.', 'warn', 5000); return; }
+  const v = await ask({ title: 'Đổi tên layer ' + l, msg: 'Tối đa ' + LNMAX + ' byte (≈ ' + LNMAX + ' chữ không dấu, hoặc ít hơn nếu có dấu). Để trống = tên mặc định (' + defLabel(l) + ').', input: true, value: LN[l], placeholder: defLabel(l), ok: 'Đổi tên' });
+  if (v === false) return;
+  const name = String(v).replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  if (TE.encode(name).length > LNMAX) { toast('Tên quá dài (' + TE.encode(name).length + '/' + LNMAX + ' byte). Rút gọn rồi thử lại.', 'warn', 4500); return; }
+  LN[l] = name; changed(); toast(name ? 'Đã đặt tên layer ' + l + ': ' + name : 'Đã về tên mặc định', 'ok');
+}
 function bindLayers() {
-  $('#addLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = KC_TRNS; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
-  $('#dupLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = w[K(layer, i)]; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
+  $('#renLayer').onclick = () => renameLayer(layer);
+  $('#addLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = KC_TRNS; LN[nl()] = ''; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
+  $('#dupLayer').onclick = () => { if (nl() >= L) return; for (let i = 0; i < NK; i++) w[K(nl(), i)] = w[K(layer, i)]; LN[nl()] = ''; w[NLI] = nl() + 1; layer = nl() - 1; sel = -1; changed(); };
   $('#delLayer').onclick = async () => {
     if (nl() <= 1) return;
     if (!await ask({ title: 'Xoá layer cuối?', msg: 'Layer ' + (nl() - 1) + ' sẽ bị bỏ khỏi cấu hình.', ok: 'Xoá', danger: true })) return;
-    w[NLI] = nl() - 1; if (layer >= nl()) layer = nl() - 1; sel = -1; changed();
+    LN[nl() - 1] = ''; w[NLI] = nl() - 1; if (layer >= nl()) layer = nl() - 1; sel = -1; changed();
   };
 }
 
-// ----- tap dance / combo -----
-const mk = (idx, small) => { const c = w[idx]; return '<button type="button" class="mini-key ' + catClass(c) + '" data-w="' + idx + '"><small>' + small + '</small><span>' + esc(label(c)) + '</span></button>'; };
-function renderAdv() {
-  $('#tdList').innerHTML = [0, 1, 2, 3].map(n => '<div class="td-item"><div class="td-head"><b>Tap dance ' + (n + 1) + '</b><span class="tag">TD' + (n + 1) + '</span></div><div class="td-slots">' + ['Bấm', 'Giữ', 'Bấm 2 lần'].map((nm, k) => mk(BASE_TD + n * 3 + k, nm)).join('') + '</div></div>').join('');
-  $('#cbList').innerHTML = [0, 1, 2, 3].map(n => { const b = BASE_CB + n * 3, on = w[b] !== 0;
-    return '<div class="cb-item ' + (on ? 'on' : '') + '"><div class="cb-head"><b>Combo ' + (n + 1) + '</b><span class="tag ' + (on ? 'on' : '') + '">' + (on ? 'bật' : 'tắt') + '</span><button class="btn xs" data-clr="' + n + '">Tắt</button></div><div class="cb-row">' + mk(b, 'Phím A') + '<span class="cb-op">+</span>' + mk(b + 1, 'Phím B') + '<span class="cb-op arrow">→</span>' + mk(b + 2, 'Kết quả') + '</div></div>'; }).join('');
-}
-function bindAdv() {
-  $('#view-adv').addEventListener('click', e => {
-    const b = e.target.closest('[data-w]'), c = e.target.closest('[data-clr]');
-    if (!loaded) { toast('Hãy kết nối bàn phím trước.', 'warn'); return; }
-    if (c) { const base = BASE_CB + c.dataset.clr * 3; for (let k = 0; k < 3; k++) w[base + k] = 0; changed(); return; }
-    if (b) { const idx = +b.dataset.w; pickInfo = { title: 'Gán ô', code: w[idx] }; pickCb = code => { w[idx] = code; changed(); }; openPicker(); }
-  });
-}
 
-// ----- macro -----
-const macLines = m => m.text.split('\n').filter(t => t.trim() && t.trim()[0] !== '#').length;
-function renderMacro() {
-  if (!M.length) { $('#macList').innerHTML = '<div class="mac-empty" style="grid-column:1/-1">Kết nối bàn phím để tải macro.</div>'; $('#macEditor').innerHTML = ''; return; }
-  $('#macList').innerHTML = M.map((m, i) => '<button type="button" class="mac-chip ' + (i === macSel ? 'on ' : '') + (m.text.trim() ? 'has' : '') + '" data-i="' + i + '"><b>M' + (i + 1) + '</b><span>' + esc(m.name || 'Trống') + '</span><small>' + macLines(m) + ' bước</small></button>').join('');
-  const m = M[macSel]; $('#macTitle').textContent = 'Macro ' + (macSel + 1);
-  $('#macEditor').innerHTML = '<div class="mac-fields"><label class="field"><span>Tên</span><input class="mac-in" id="mName" maxlength="12" value="' + esc(m.name) + '"></label><label class="field"><span>Lặp</span><input class="mac-in" id="mRep" type="number" min="1" max="99" value="' + m.rep + '"></label><label class="field"><span>Nghỉ giữa lần lặp (ms)</span><input class="mac-in" id="mGap" type="number" min="0" max="65535" value="' + m.gap + '"></label></div>' +
-    '<div class="mac-toolbar"><button class="btn sm" data-add="tap">+ Bấm</button><button class="btn sm" data-add="down">+ Giữ</button><button class="btn sm" data-add="up">+ Nhả</button><button class="btn sm" data-add="wait">+ Chờ</button><button class="btn sm" data-add="type">+ Gõ chữ</button><span class="sep"></span><button class="btn sm danger" data-add="clear">Xoá hết</button></div>' +
-    '<textarea class="mac-in mac-ta" id="mText" spellcheck="false" placeholder="tap A&#10;wait 50&#10;type xin chao">' + esc(m.text) + '</textarea><div class="mac-err" id="mErr"></div><div class="mac-sum" id="mSum"></div>';
-  macCheck();
-}
-function macCheck() {
-  const m = M[macSel]; if (!m) return;
-  try { const b = macEncode(macSel, m); $('#mErr').textContent = ''; $('#mSum').textContent = 'Dùng ' + (b[16] | b[17] << 8) + ' / ' + (MSLOT - 18) + ' byte'; $('#macSub').textContent = macLines(m) + ' bước'; }
-  catch (e) { $('#mErr').textContent = e.message; $('#mSum').textContent = ''; }
-}
-function appendLine(l) { const m = M[macSel]; m.text = (m.text && !m.text.endsWith('\n') ? m.text + '\n' : m.text) + l; macChanged(true); }
-function macChanged(rerender) { commit(); if (rerender) renderMacro(); else { macCheck(); renderMacroList(); } updateDirtyUI(); }
-function renderMacroList() { $$('#macList .mac-chip').forEach((b, i) => { const m = M[i]; b.querySelector('span').textContent = m.name || 'Trống'; b.querySelector('small').textContent = macLines(m) + ' bước'; b.classList.toggle('has', !!m.text.trim()); }); }
-function bindMacro() {
-  $('#macList').addEventListener('click', e => { const b = e.target.closest('.mac-chip'); if (b) { macSel = +b.dataset.i; renderMacro(); } });
-  const ed = $('#macEditor');
-  ed.addEventListener('input', e => { const m = M[macSel]; if (!m) return;
-    if (e.target.id === 'mName') m.name = e.target.value; else if (e.target.id === 'mRep') m.rep = +e.target.value || 1; else if (e.target.id === 'mGap') m.gap = +e.target.value || 0; else if (e.target.id === 'mText') m.text = e.target.value; else return;
-    macCheck(); renderMacroList(); updateDirtyUI(); });
-  ed.addEventListener('change', commit);
-  ed.addEventListener('click', async e => {
-    const b = e.target.closest('[data-add]'); if (!b) return; const t = b.dataset.add;
-    if (t === 'clear') { M[macSel].text = ''; macChanged(true); }
-    else if (t === 'wait') { const v = await ask({ title: 'Chờ bao nhiêu ms?', input: true, value: '100' }); if (v != null && +v >= 0) appendLine('wait ' + (+v | 0)); }
-    else if (t === 'type') { const v = await ask({ title: 'Gõ chữ (ASCII)', input: true, placeholder: 'xin chao' }); if (v) appendLine('type ' + v); }
-    else { pickInfo = { title: 'Chọn phím cho bước «' + t + '»' }; pickCb = code => appendLine(t + ' ' + kn(code)); openPicker(); }
-  });
-}
-function collectMac() { M.forEach((m, i) => mac.set(macEncode(i, m), i * MSLOT)); }
-
-// ----- LED -----
-const FX = [['Tắt hết', 'Không sáng đèn nào.', '#2a3140,#2a3140'], ['Sáng hết', 'Cả 6 đèn sáng liên tục.', '#7c5cff,#22d3ee'], ['Chạy đuổi', 'Một đèn chạy dọc dây.', '#22d3ee,#3ddc97'], ['Qua lại', 'Đèn chạy qua rồi quay lại.', '#7c5cff,#ff8fb1'], ['Nhấp nháy', 'Cả dây nhấp nháy.', '#ffb86b,#ff5d7a'], ['Xen kẽ', 'Đèn chẵn và lẻ đổi phiên.', '#b6ff3b,#22d3ee'], ['Dâng rồi tắt dần', 'Sáng dần từng đèn rồi tắt dần.', '#22d3ee,#7c5cff'], ['Lấp lánh', 'Các đèn nháy ngẫu nhiên.', '#ff8fb1,#ffb86b'], ['Nổ từ giữa', 'Lan từ giữa ra hai đầu.', '#ff5d7a,#ffb86b']];
-function renderLed() {
-  const mode = clamp(w[LDB] || 2, 1, FX.length);
-  $('#fxGrid').innerHTML = FX.map((f, i) => '<button type="button" class="fx-card ' + (i + 1 === mode ? 'on' : '') + '" data-m="' + (i + 1) + '"><span class="fx-swatch" style="--sw:linear-gradient(135deg,' + f[2] + ')"></span><span class="fx-txt"><b>' + (i + 1) + ' · ' + f[0] + '</b><small>' + f[1] + '</small></span><span class="fx-check">✓</span></button>').join('');
-  $('#ledFxName').textContent = FX[mode - 1][0]; $('#ledFxDesc').textContent = FX[mode - 1][1]; $('#ledModeBadge').textContent = 'MODE ' + mode;
-  $('#ledBoard').innerHTML = [0, 1, 2, 3, 4, 5].map(i => '<div class="led-dot' + (mode > 1 && (mode !== 3 || i === 0) ? ' on' : '') + '"></div>').join('');
-  const t = clamp(w[LDB + 1] || 100, 20, 2000); $('#ledTick').value = t; $('#ledTickV').textContent = t + ' ms';
-  $('#ledBat').classList.toggle('on', !!w[LDB + 2]); $('#ledInd').classList.toggle('on', !!w[LDB + 3]);
-}
-function bindLed() {
-  const guard = () => { if (!loaded) { toast('Hãy kết nối bàn phím trước.', 'warn'); return false; } return true; };
-  $('#fxGrid').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b && guard()) { w[LDB] = +b.dataset.m; changed(); } });
-  $('#ledTick').oninput = e => { if (!guard()) return; w[LDB + 1] = +e.target.value; $('#ledTickV').textContent = e.target.value + ' ms'; updateDirtyUI(); };
-  $('#ledTick').onchange = () => commit();
-  $('#ledBat').onclick = () => { if (guard()) { w[LDB + 2] = w[LDB + 2] ? 0 : 1; changed(); } };
-  $('#ledInd').onclick = () => { if (guard()) { w[LDB + 3] = w[LDB + 3] ? 0 : 1; changed(); } };
-}
-
-// ----- kết nối / công cụ -----
-async function ctl(op, arg) { const b = pkt(11, 0, 0); b[1] = op; b[2] = arg || 0; await xf(b); await getInfo(); renderStat(); }
-function renderStat() {
-  const el = $('#conStat'), s = $('#slots');
-  if (!info) { el.innerHTML = '<span class="pill-s">Chưa kết nối</span>'; s.innerHTML = ''; return; }
-  const tr = ['không có', 'USB', 'BLE'][info.tr] || '?';
-  el.innerHTML = '<span class="pill-s ' + (info.usb ? 'ok' : 'warn') + '">USB ' + (info.usb ? 'sẵn sàng' : 'chưa') + '</span><span class="pill-s ' + (info.ble ? 'ok' : '') + '">BLE ' + (info.ble ? 'đã kết nối' : 'chưa kết nối') + '</span><span class="pill-s">Ưu tiên: ' + (info.out ? 'BLE' : 'USB') + '</span><span class="pill-s">Đang gửi qua: ' + tr + '</span><span class="pill-s">Hồ sơ BLE: ' + (info.slot + 1) + '</span>';
-  $('#oUsb').classList.toggle('active', !info.out); $('#oBle').classList.toggle('active', !!info.out);
-  s.innerHTML = [0, 1, 2, 3, 4].map(i => '<button class="btn ' + (i === info.slot ? 'primary' : '') + '" data-slot="' + i + '">' + (i + 1) + '</button>').join('');
-  $$('#slots [data-slot]').forEach(b => b.onclick = () => ctl(3, +b.dataset.slot));
-  $('#devLed').style.background = info.usb || info.ble ? 'var(--ok)' : '';
-}
-function renderTools() {
-  $('#devState').textContent = dev ? 'Đã kết nối' : 'Chưa kết nối';
-  $('#devInfo').innerHTML = info ? [['Firmware', 'v' + info.ver], ['Layer tối đa', info.L], ['Số từ cấu hình', info.NW], ['Macro', info.nmac + ' × ' + info.mslot + ' B'], ['Hiệu ứng LED', info.nfx]].map(r => '<div class="info-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>').join('') : '<p class="empty-mini">Kết nối bàn phím để xem thông tin.</p>';
-}
-function updateConnUI() {
-  const on = !!dev; $('#connCard').classList.toggle('on', on);
-  $('#connTitle').textContent = on ? ((dev.productName) || 'Numpad21') : 'Chưa kết nối';
-  $('#connSub').textContent = on ? 'Đã kết nối · nhớ bấm Lưu' : 'Cắm cáp USB để cấu hình';
-  $('#discBtn').style.display = on ? '' : 'none'; $('#connBtn').style.display = on ? 'none' : '';
-  const mc = $('#mobileConn'); mc.classList.toggle('on', on); mc.querySelector('span').textContent = on ? 'Đã kết nối' : 'Kết nối';
-  $('#saveBtn').disabled = !on || !loaded; ['#defaultsBtn', '#bootBtn', '#oUsb', '#oBle', '#bClr'].forEach(s => $(s).disabled = !on);
-  $('#exportBtn').disabled = $('#importBtn').disabled = !loaded; renderStat(); renderTools();
-}
-async function openDevice(d) {
-  dev = d; if (!dev.opened) await dev.open(); dev.addEventListener('inputreport', onrep);
-  await getInfo();
-  if (info.ver < 11 || info.L !== L || info.nk !== NK || info.NW !== NW) throw new Error('Firmware không khớp — cần firmware v11 (16 layer, 32 macro). Đang là: ver ' + info.ver + ', L ' + info.L + ', NK ' + info.nk + ', NW ' + info.NW + ')');
-  MSLOT = info.mslot; NMAC = info.nmac; await readAll();
-  M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); M0 = JSON.stringify(M);
-  layer = 0; sel = -1; macSel = 0; loaded = true; resetHist(); progDone(); renderAll();
-  clearInterval(pollT); pollT = setInterval(poll, 2000); toast('Đã tải cấu hình từ bàn phím', 'ok');
-}
-async function connect(silent) {
-  if (!navigator.hid) { if (!silent) toast('Trình duyệt không hỗ trợ WebHID. Dùng Chrome hoặc Edge.', 'err'); return; }
-  try {
-    let d = (await navigator.hid.getDevices()).find(x => x.collections.some(c => c.usagePage === 0xFF60));
-    if (!d) { if (silent) return; d = (await navigator.hid.requestDevice({ filters: [{ vendorId: 0xC1A0, usagePage: 0xFF60, usage: 0x61 }] }))[0]; }
-    if (!d) return; await openDevice(d);
-  } catch (e) { console.error(e); dev = null; progDone(); toast('Lỗi: ' + e.message, 'err', 5000); }
-}
-async function poll() { try { if (dev && !document.hidden) { await getInfo(); renderStat(); } } catch (e) { } }
-function onGone() { dev = null; info = null; clearInterval(pollT); updateConnUI(); toast('Đã ngắt kết nối', 'warn'); }
-async function disconnect() { try { if (dev) await dev.close(); } catch (e) { } onGone(); }
-async function saveFlash() {
-  if (!dev || !loaded) { toast('Chưa kết nối bàn phím.', 'warn'); return; }
-  try { collectMac(); } catch (e) { showView('macro'); toast(e.message, 'err', 5000); return; }
-  try { prog('Đang ghi…'); await writeAll(); M0 = JSON.stringify(M); progDone(); updateDirtyUI(); toast('Đã lưu vào bàn phím', 'ok'); }
-  catch (e) { progDone(); toast('Lỗi: ' + e.message, 'err', 5000); }
-}
-async function defaultsDevice() {
-  if (!await ask({ title: 'Về mặc định firmware?', msg: 'Toàn bộ cấu hình và macro trên bàn phím sẽ bị đặt lại.', ok: 'Đặt lại', danger: true })) return;
-  try { await xf(pkt(4, 0, 0)); await xf(pkt(3, 0, 0)); await readAll(); M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); M0 = JSON.stringify(M); layer = 0; sel = -1; resetHist(); progDone(); renderAll(); toast('Đã về mặc định', 'ok'); }
-  catch (e) { progDone(); toast('Lỗi: ' + e.message, 'err'); }
-}
-function exportProfile() {
-  try { collectMac(); } catch (e) { toast(e.message, 'err'); return; }
-  const o = { fw: 'numpad21', w: Array.from(w), mac: btoa(String.fromCharCode(...mac)) };
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(o)], { type: 'application/json' })); a.download = 'numpad21-config.json'; a.click();
-}
-async function importProfile(file) {
-  try {
-    const o = JSON.parse(await file.text());
-    if (o.fw !== 'numpad21' || o.w.length !== NW) throw new Error('File không đúng định dạng numpad21');
-    const raw = atob(o.mac), m = new Uint8Array(raw.length); for (let i = 0; i < raw.length; i++) m[i] = raw.charCodeAt(i);
-    if (m.length !== mac.length) throw new Error('Kích thước macro không khớp');
-    w.set(o.w); mac.set(m); M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); layer = 0; sel = -1; changed(); toast('Đã nhập — bấm «Lưu vào bàn phím» để ghi', 'ok');
-  } catch (er) { toast(er.message, 'err', 5000); }
-}
-
-// ----- khung chung -----
-function renderAll() {
-  if (layer >= nl()) layer = nl() - 1;
-  renderLayers(); renderDevice(); renderInspector(); renderLayerInfo(); renderAdv(); renderLed(); if (view === 'macro') renderMacro(); if (view === 'morse') renderMorse(); updateDirtyUI(); updateUndo(); renderTools();
-}
-function showView(v) {
-  view = v; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.view === v)); $$('.view').forEach(s => s.classList.toggle('on', s.id === 'view-' + v));
-  const meta = { keymap: ['Bàn phím', 'Gán phím và layer'], macro: ['Macro', 'Viết chuỗi phím rồi gán vào phím'], morse: ['Morse', 'Gõ chữ bằng 3 phím: chấm, gạch, xong'], adv: ['Nâng cao', 'Tap dance và combo'], led: ['Đèn LED', 'Hiệu ứng và tốc độ 6 dây LED'], conn: ['Kết nối', 'USB, Bluetooth và ghép đôi'], tools: ['Công cụ', 'Hồ sơ, thiết bị và phím tắt'] }[v];
-  $('#viewTitle').textContent = meta[0]; $('#viewSub').textContent = meta[1];
-  if (v === 'macro') renderMacro();
-  if (v === 'morse') renderMorse();
-}
-function applyTheme(t) {
-  t = t === 'light' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; ls.set('numpad21.studio.theme', t);
-  $('#themeBtn').innerHTML = (t === 'dark' ? ICON_SUN : ICON_MOON) + '<span>' + (t === 'dark' ? 'Giao diện sáng' : 'Giao diện tối') + '</span>';
-  $('#themeBtn2').innerHTML = t === 'dark' ? ICON_SUN : ICON_MOON;
-}
-const toggleTheme = () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-function onKeyDown(e) {
-  if (capturing) {
-    e.preventDefault(); e.stopPropagation();
-    if (e.key === 'Escape') { capturing = false; updateCaptureUI(); return; }
-    const c = hidFromEvent(e); if (c != null && (c < 0x100 || BYCODE.has(c))) { capturing = false; updateCaptureUI(); assign(c); }
-    return;
-  }
-  if (pickerOpen) { if (e.key === 'Escape') { e.preventDefault(); closePicker(); } return; }
-  if (dlgOpen) { if (e.key === 'Escape') { e.preventDefault(); closeDlg(false); } else if (e.key === 'Enter') { e.preventDefault(); const i = $('#dlgInput'); closeDlg(i.hidden ? true : i.value); } return; }
-  const mod = e.ctrlKey || e.metaKey, k = (e.key || '').toLowerCase();
-  if (mod && k === 's') { e.preventDefault(); saveFlash(); return; }
-  const tag = (e.target && e.target.tagName || '').toLowerCase(); const typing = tag === 'input' || tag === 'select' || tag === 'textarea';
-  if (mod && k === 'z' && !e.shiftKey && !typing) { e.preventDefault(); undo(); return; }
-  if (mod && (k === 'y' || (k === 'z' && e.shiftKey)) && !typing) { e.preventDefault(); redo(); return; }
-  if (typing || view !== 'keymap' || !loaded) return;
-  if (e.key === 'ArrowLeft') { e.preventDefault(); layer = clamp(layer - 1, 0, nl() - 1); sel = -1; renderAll(); }
-  else if (e.key === 'ArrowRight') { e.preventDefault(); layer = clamp(layer + 1, 0, nl() - 1); sel = -1; renderAll(); }
-  else if (/^[1-9]$/.test(e.key) && !mod && +e.key - 1 < nl()) { layer = +e.key - 1; sel = -1; renderAll(); }
-}
-function bind() {
-  $$('#nav button').forEach(b => b.onclick = () => showView(b.dataset.view));
-  $('#connBtn').onclick = () => connect(false); $('#mobileConn').onclick = () => dev ? showView('conn') : connect(false); $('#discBtn').onclick = disconnect;
-  $('#themeBtn').onclick = $('#themeBtn2').onclick = toggleTheme; $('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo; $('#saveBtn').onclick = saveFlash;
-  $('#pkClose').onclick = closePicker; $('#pkWrap').onclick = e => { if (e.target.id === 'pkWrap') closePicker(); };
-  $('#pkSearch').oninput = renderPicker; $('#pkCap').onclick = () => { capturing = !capturing; updateCaptureUI(); };
-  $('#pkShift').onclick = () => { pkShift = !pkShift; $('#pkShift').classList.toggle('active', pkShift); };
-  $('#pkTrns').onclick = () => assign(1); $('#pkNone').onclick = () => assign(0);
-  $('#pkHexOk').onclick = () => { const v = parseInt($('#pkHex').value, 16); if (!isNaN(v) && v >= 0 && v < 0x10000) assign(v); else toast('Mã hex không hợp lệ', 'warn'); };
-  $('#dlgOk').onclick = () => { const i = $('#dlgInput'); closeDlg(i.hidden ? true : i.value); }; $('#dlgCancel').onclick = () => closeDlg(false);
-  $('#oUsb').onclick = () => ctl(0); $('#oBle').onclick = () => ctl(1);
-  $('#bClr').onclick = async () => { if (await ask({ title: 'Xoá ghép đôi BLE?', msg: 'Toàn bộ 5 hồ sơ ghép đôi sẽ bị xoá.', ok: 'Xoá', danger: true })) ctl(4); };
-  $('#bootBtn').onclick = async () => { if (await ask({ title: 'Vào bootloader?', msg: 'Bàn phím sẽ ngắt kết nối để nạp firmware UF2.', ok: 'Vào bootloader', danger: true })) { try { await xf(Object.assign(pkt(11, 0, 0), { 1: 5 })); } catch (e) { } } };
-  $('#defaultsBtn').onclick = defaultsDevice; $('#exportBtn').onclick = exportProfile; $('#importBtn').onclick = () => $('#fileInput').click();
-  $('#fileInput').onchange = e => { if (e.target.files[0]) importProfile(e.target.files[0]); e.target.value = ''; };
-  document.addEventListener('keydown', onKeyDown, true); bindLayers(); bindAdv(); bindMacro(); bindLed(); bindMorse();
-  navigator.hid && navigator.hid.addEventListener('disconnect', e => { if (e.device === dev) onGone(); });
-}
-// <morse-engine>
-// Thuật toán gõ Morse — PHẢI giống firmware (morse.h). test/run_tests.sh nạp đúng đoạn này và so với bản C trên chuỗi sự kiện ngẫu nhiên.
-const MORSE_MAX = 7;
-const MORSE_TAB = [   // [ký tự, mã] — cùng thứ tự với MORSE_TAB trong morse.h
-  ["a", ".-"], ["b", "-..."], ["c", "-.-."], ["d", "-.."], ["e", "."], ["f", "..-."], ["g", "--."], ["h", "...."], ["i", ".."],
-  ["j", ".---"], ["k", "-.-"], ["l", ".-.."], ["m", "--"], ["n", "-."], ["o", "---"], ["p", ".--."], ["q", "--.-"], ["r", ".-."],
-  ["s", "..."], ["t", "-"], ["u", "..-"], ["v", "...-"], ["w", ".--"], ["x", "-..-"], ["y", "-.--"], ["z", "--.."], ["0", "-----"],
-  ["1", ".----"], ["2", "..---"], ["3", "...--"], ["4", "....-"], ["5", "....."], ["6", "-...."], ["7", "--..."], ["8", "---.."], ["9", "----."],
-  [".", ".-.-.-"], [",", "--..--"], ["?", "..--.."], ["'", ".----."], ["!", "-.-.--"], ["/", "-..-."], ["(", "-.--."], [")", "-.--.-"], ["&", ".-..."],
-  [":", "---..."], [";", "-.-.-."], ["=", "-...-"], ["+", ".-.-."], ["-", "-....-"], ["_", "..--.-"], ["\"", ".-..-."], ["$", "...-..-"], ["@", ".--.-."]
-];
-const KC_MORSE = { dot: 0x7060, dash: 0x7061, ok: 0x7062, hint: 0x7063, led: 0x7064 };
-const MORSE_HINT_MAX = 8;   // " [.i -a]"
-const MORSE_OPT = { hint: true };   // bật gợi ý trên văn bản — mặc định giống MORSE_HINT_DEF trong numpad21.ino
-// Bố cục layer 3 mặc định (giống mo[] trong defaults() của numpad21.ino): 22 vị trí theo thứ tự phím (xem PNAME), vị trí 21 = nút layer nhỏ
-// ESC = về layer 0, FN giữ nguyên · hàng 2: Caps, giữ Shift · "+" Backspace · hàng 5: Chấm Gạch Xong Enter · "0" Space, "." Gợi ý
-const MORSE_LAYOUT = [TLK(0), 0, 0, 1, 0, 0x39, 0x7003, 0, 0, 0, 0, 0, 0, 0, 0x2A, KC_MORSE.dot, KC_MORSE.dash, KC_MORSE.ok, 0x28, 0x2C, KC_MORSE.hint, LYN];
-const morseFind = code => { for (const t of MORSE_TAB) if (t[1] === code) return t[0]; return ''; };
-const morseNew = () => ({ code: '', shown: false, hint: 0 });   // hint = số ký tự gợi ý đang hiện trên máy tính
-const morseCommit = m => { m.code = ''; m.shown = false; m.hint = 0; };   // chỉ đặt lại trạng thái, không gửi phím
-// Gợi ý cho mã code: " [.i -a]" = thêm chấm ra 'i', thêm gạch ra 'a' (chỉ in nhánh có ký tự).
-function morseHintStr(code) {
-  if (code.length >= MORSE_MAX) return '';
-  const b = ['.', '-'].map(x => [x, morseFind(code + x)]).filter(t => t[1]).map(t => t[0] + t[1]);
-  return b.length ? ' [' + b.join(' ') + ']' : '';
-}
-// io = { room(), bs(), put(ch) }. Trả 1 nếu nhận, 0 nếu bỏ qua (mã đã dài 7 hoặc hàng đợi phím hết chỗ) — khi bỏ qua trạng thái không đổi.
-// Gợi ý bật: xoá (ký tự tạm + gợi ý cũ), gửi ký tự mới, gửi gợi ý mới; chừa sẵn chỗ để lát nữa xoá gợi ý lúc chốt.
-function morsePress(m, dash, io) {
-  if (m.code.length >= MORSE_MAX) return 0;
-  const nc = m.code + (dash ? '-' : '.'), ch = morseFind(nc), h = MORSE_OPT.hint ? morseHintStr(nc) : '', del = (m.shown ? 1 : 0) + m.hint;
-  if (io.room() < del + (ch ? 1 : 0) + 2 * h.length) return 0;
-  for (let i = 0; i < del; i++) io.bs();
-  if (ch) io.put(ch);
-  for (const c of h) io.put(c);
-  m.code = nc; m.shown = !!ch; m.hint = h.length; return 1;
-}
-// Chốt ký tự: xoá phần gợi ý khỏi văn bản (ký tự tạm ở lại), rồi đặt lại trạng thái.
-function morseCommitIO(m, io) { for (let i = 0; i < m.hint; i++) io.bs(); morseCommit(m); }
-// Bật / tắt gợi ý (đang gõ dở thì hiện hoặc xoá gợi ý ngay). Trả 1 nếu đã đổi, 0 nếu hàng đợi phím hết chỗ.
-function morseSetHint(m, on, io) {
-  on = !!on; if (on === MORSE_OPT.hint) return 1;
-  if (!on) { if (io.room() < m.hint) return 0; for (let i = 0; i < m.hint; i++) io.bs(); m.hint = 0; MORSE_OPT.hint = false; return 1; }
-  const h = m.code ? morseHintStr(m.code) : '';
-  if (io.room() < 2 * h.length) return 0;
-  MORSE_OPT.hint = true; for (const c of h) io.put(c); m.hint = h.length; return 1;
-}
-// Đèn LED báo Morse — giống morse_led_frame() trong morse.h: cùng công thức, test/cross_check.js so từng khung hình với bản C.
-const MORSE_LED = { none: 0xFF, all: 0x3F, dot: 80, dash: 240, ack: 70, hold: 2500, defOn: true };
-function morseLedFrame(len, dash, sincePress, sinceAck) {
-  if (sinceAck < 4 * MORSE_LED.ack) return Math.floor(sinceAck / MORSE_LED.ack) % 2 === 0 ? MORSE_LED.all : 0;
-  if (len && sincePress < MORSE_LED.hold) {
-    if (sincePress < (dash ? MORSE_LED.dash : MORSE_LED.dot)) return MORSE_LED.all;
-    return len >= 6 ? MORSE_LED.all : (1 << len) - 1;
-  }
-  return MORSE_LED.none;
-}
-// </morse-engine>
-const hasMorse = l => { for (let p = 0; p < NK; p++) { const c = w[K(l, p)]; if (c >= KC_MORSE.dot && c <= KC_MORSE.hint) return true; } return false; };
 // ----- Morse -----
 const MO_GROUPS = [['Chữ cái', c => /[a-z]/.test(c)], ['Chữ số', c => /[0-9]/.test(c)], ['Dấu câu', c => !/[a-z0-9]/.test(c)]];
 const mo = { m: morseNew(), text: '', caps: false, log: [], led: MORSE_LED.defOn, dash: false, tp: -1e9, ta: -1e9 };
@@ -1582,11 +1450,16 @@ const moIO = {
 const glyph = code => '<span class="mo-g">' + [...code].map(c => '<i class="' + (c === '.' ? 'd' : 'h') + '"></i>').join('') + '</span>';
 function moEvent(ev) {
   const hadCode = mo.m.code.length > 0;
+  if (ev !== 'enter') mo.enterOnce = false;
   if (ev === 'dot' || ev === 'dash') moPressOne(ev === 'dash');
   else if (ev === 'ok') morseCommitIO(mo.m, moIO);
   else if (ev === 'hint') morseSetHint(mo.m, !MORSE_OPT.hint, moIO);
   else if (ev === 'space') { morseCommitIO(mo.m, moIO); mo.text += ' '; mo.log.push('␣'); }
-  else if (ev === 'enter') { morseCommitIO(mo.m, moIO); mo.text += '\n'; mo.log.push('↵'); }
+  else if (ev === 'enter') {   // giống Tap dance 4: bấm 1 lần = Xong, bấm liền lần 2 = Space
+    if (mo.enterOnce) { mo.text += ' '; mo.log.push('␣'); mo.enterOnce = false; }
+    else { morseCommitIO(mo.m, moIO); mo.enterOnce = true; }
+  }
+  else if (ev === 'newline') { morseCommitIO(mo.m, moIO); mo.text += '\n'; mo.log.push('↵'); }
   else if (ev === 'bs') { morseCommitIO(mo.m, moIO); mo.text = mo.text.slice(0, -1); mo.log.push('⌫'); }
   else if (ev === 'led') mo.led = !mo.led;
   else if (ev === 'clear') { morseCommit(mo.m); mo.text = ''; mo.log = []; }   // xoá hết: bỏ cả văn bản nên không cần xoá gợi ý riêng
@@ -1654,9 +1527,10 @@ function renderMorse() {
   if ([...$('#moLayer').options].some(o => o.value === want)) $('#moLayer').value = want;
   if (keep.d !== '') { $('#moPD').value = keep.d; $('#moPH').value = keep.h; $('#moPO').value = keep.o; }
   else if (pref) { $('#moPD').value = pref.f.dot[0]; $('#moPH').value = pref.f.dash[0]; $('#moPO').value = pref.f.ok[0]; }
+  $('#moApply3').disabled = $('#moApplyFull').disabled = !loaded;
 }
 function moEnsureLayers(n) {
-  while (nl() < n && nl() < L) { const l = nl(); for (let i = 0; i < NK; i++) w[K(l, i)] = KC_TRNS; w[NLI] = l + 1; }
+  while (nl() < n && nl() < L) { const l = nl(); for (let i = 0; i < NK; i++) w[K(l, i)] = KC_TRNS; LN[l] = ''; w[NLI] = l + 1; }
 }
 function moDone(msg) { changed(); toast(msg, 'ok', 4000); }
 function moApply3() {
@@ -1666,18 +1540,19 @@ function moApply3() {
   let l; if (v === 'new') { moEnsureLayers(nl() + 1); l = nl() - 1; } else l = +v;
   for (let p = 0; p < NK; p++) { const c = w[K(l, p)]; if (c >= KC_MORSE.dot && c <= KC_MORSE.ok) w[K(l, p)] = 0; }
   w[K(l, d)] = KC_MORSE.dot; w[K(l, h)] = KC_MORSE.dash; w[K(l, o)] = KC_MORSE.ok;
-  moDone('Đã gán Chấm/Gạch/Xong vào layer ' + l + ' · nhớ bấm «Lưu vào bàn phím»');
+  moDone('Đã gán Chấm/Gạch/Xong vào layer ' + l + (l > 5 ? ' — lưu ý: nút layer nhỏ chỉ chuyển vòng layer 0..5, hãy gán thêm phím TG ' + l : '') + ' · nhớ bấm «Lưu vào bàn phím»');
 }
 async function moApplyFull() {
   if (!loaded) { toast('Hãy kết nối bàn phím trước.', 'warn'); return; }
-  if (!await ask({ title: 'Ghi bố cục Morse vào Layer 3?', msg: 'Toàn bộ phím của layer 3 sẽ bị thay bằng bố cục Morse mặc định (nút layer nhỏ và FN giữ nguyên).', ok: 'Ghi đè' })) return;
+  if (!await ask({ title: 'Ghi bố cục Morse vào Layer 3?', msg: 'Toàn bộ phím của layer 3 sẽ bị thay bằng bố cục Morse mặc định (nút layer nhỏ và FN giữ nguyên). Phím ENTER dùng Tap dance 4: bấm 1 lần = Xong, bấm 2 lần = Space, giữ = Enter — cấu hình Tap dance 4 hiện có sẽ bị ghi đè.', ok: 'Ghi đè' })) return;
   moEnsureLayers(4); for (let i = 0; i < NK; i++) w[K(3, i)] = MORSE_LAYOUT[i];
+  w[BASE_TD + 9] = KC_MORSE.ok; w[BASE_TD + 10] = 0x28; w[BASE_TD + 11] = 0x2C;   // Tap dance 4: bấm = Xong · giữ = Enter · bấm 2 lần = Space
   moDone('Đã ghi layer 3 = Morse. Nhớ bấm «Lưu vào bàn phím»');
 }
 function bindMorse() {
   renderMorseTable(); renderMorseSim();
   const press = (id, ev) => { const b = $(id); b.onclick = () => { moEvent(ev); $('#moScreen').focus(); }; };
-  press('#moDot', 'dot'); press('#moDash', 'dash'); press('#moOk', 'ok'); press('#moSpace', 'space'); press('#moBs', 'bs'); press('#moEnter', 'enter'); press('#moClear', 'clear'); press('#moLedBtn', 'led'); setInterval(drawMoLed, 40); press('#moHint', 'hint');
+  press('#moDot', 'dot'); press('#moDash', 'dash'); press('#moOk', 'ok'); press('#moSpace', 'space'); press('#moBs', 'bs'); press('#moEnter', 'enter'); press('#moNl', 'newline'); press('#moClear', 'clear'); press('#moLedBtn', 'led'); setInterval(drawMoLed, 40); press('#moHint', 'hint');
   $('#moCaps').onclick = () => { mo.caps = !mo.caps; renderMorseSim(); };
   $('#moTable').onclick = e => { const b = e.target.closest('.mo-cell'); if (b) moTypeCode(b.dataset.code); };
   const map = { '1': 'dot', '.': 'dot', '2': 'dash', '-': 'dash', '3': 'ok', ' ': 'space', Enter: 'enter', Backspace: 'bs' };
@@ -1691,6 +1566,221 @@ function bindMorse() {
   $('#moApply3').onclick = moApply3; $('#moApplyFull').onclick = moApplyFull;
 }
 
+// ----- tap dance / combo -----
+const mk = (idx, small) => { const c = w[idx]; return '<button type="button" class="mini-key ' + catClass(c) + '" data-w="' + idx + '"><small>' + small + '</small><span>' + esc(label(c)) + '</span></button>'; };
+function renderAdv() {
+  $('#tdList').innerHTML = [0, 1, 2, 3].map(n => '<div class="td-item"><div class="td-head"><b>Tap dance ' + (n + 1) + '</b><span class="tag">TD' + (n + 1) + '</span></div><div class="td-slots">' + ['Bấm', 'Giữ', 'Bấm 2 lần'].map((nm, k) => mk(BASE_TD + n * 3 + k, nm)).join('') + '</div></div>').join('');
+  $('#cbList').innerHTML = [0, 1, 2, 3].map(n => { const b = BASE_CB + n * 3, on = w[b] !== 0;
+    return '<div class="cb-item ' + (on ? 'on' : '') + '"><div class="cb-head"><b>Combo ' + (n + 1) + '</b><span class="tag ' + (on ? 'on' : '') + '">' + (on ? 'bật' : 'tắt') + '</span><button class="btn xs" data-clr="' + n + '">Tắt</button></div><div class="cb-row">' + mk(b, 'Phím A') + '<span class="cb-op">+</span>' + mk(b + 1, 'Phím B') + '<span class="cb-op arrow">→</span>' + mk(b + 2, 'Kết quả') + '</div></div>'; }).join('');
+}
+function bindAdv() {
+  $('#view-adv').addEventListener('click', e => {
+    const b = e.target.closest('[data-w]'), c = e.target.closest('[data-clr]');
+    if (!loaded) { toast('Hãy kết nối bàn phím trước.', 'warn'); return; }
+    if (c) { const base = BASE_CB + c.dataset.clr * 3; for (let k = 0; k < 3; k++) w[base + k] = 0; changed(); return; }
+    if (b) { const idx = +b.dataset.w; pickInfo = { title: 'Gán ô', code: w[idx] }; pickCb = code => { w[idx] = code; changed(); }; openPicker(); }
+  });
+}
+
+// ----- macro -----
+const macLines = m => m.text.split('\n').filter(t => t.trim() && t.trim()[0] !== '#').length;
+function renderMacro() {
+  if (!M.length) { $('#macList').innerHTML = '<div class="mac-empty" style="grid-column:1/-1">Kết nối bàn phím để tải macro.</div>'; $('#macEditor').innerHTML = ''; return; }
+  $('#macList').innerHTML = M.map((m, i) => '<button type="button" class="mac-chip ' + (i === macSel ? 'on ' : '') + (m.text.trim() ? 'has' : '') + '" data-i="' + i + '"><b>M' + (i + 1) + '</b><span>' + esc(m.name || 'Trống') + '</span><small>' + macLines(m) + ' bước</small></button>').join('');
+  const m = M[macSel]; $('#macTitle').textContent = 'Macro ' + (macSel + 1);
+  $('#macEditor').innerHTML = '<div class="mac-fields"><label class="field"><span>Tên</span><input class="mac-in" id="mName" maxlength="12" value="' + esc(m.name) + '"></label><label class="field"><span>Lặp</span><input class="mac-in" id="mRep" type="number" min="1" max="99" value="' + m.rep + '"></label><label class="field"><span>Nghỉ giữa lần lặp (ms)</span><input class="mac-in" id="mGap" type="number" min="0" max="65535" value="' + m.gap + '"></label></div>' +
+    '<div class="mac-toolbar"><button class="btn sm" data-add="tap">+ Bấm</button><button class="btn sm" data-add="down">+ Giữ</button><button class="btn sm" data-add="up">+ Nhả</button><button class="btn sm" data-add="wait">+ Chờ</button><button class="btn sm" data-add="type">+ Gõ chữ</button><span class="sep"></span><button class="btn sm danger" data-add="clear">Xoá hết</button></div>' +
+    '<textarea class="mac-in mac-ta" id="mText" spellcheck="false" placeholder="tap A&#10;wait 50&#10;type xin chao">' + esc(m.text) + '</textarea><div class="mac-err" id="mErr"></div><div class="mac-sum" id="mSum"></div>';
+  macCheck();
+}
+function macCheck() {
+  const m = M[macSel]; if (!m) return;
+  try { const b = macEncode(macSel, m); $('#mErr').textContent = ''; $('#mSum').textContent = 'Dùng ' + (b[16] | b[17] << 8) + ' / ' + (MSLOT - 18) + ' byte'; $('#macSub').textContent = macLines(m) + ' bước'; }
+  catch (e) { $('#mErr').textContent = e.message; $('#mSum').textContent = ''; }
+}
+function appendLine(l) { const m = M[macSel]; m.text = (m.text && !m.text.endsWith('\n') ? m.text + '\n' : m.text) + l; macChanged(true); }
+function macChanged(rerender) { commit(); if (rerender) renderMacro(); else { macCheck(); renderMacroList(); } updateDirtyUI(); }
+function renderMacroList() { $$('#macList .mac-chip').forEach((b, i) => { const m = M[i]; b.querySelector('span').textContent = m.name || 'Trống'; b.querySelector('small').textContent = macLines(m) + ' bước'; b.classList.toggle('has', !!m.text.trim()); }); }
+function bindMacro() {
+  $('#macList').addEventListener('click', e => { const b = e.target.closest('.mac-chip'); if (b) { macSel = +b.dataset.i; renderMacro(); } });
+  const ed = $('#macEditor');
+  ed.addEventListener('input', e => { const m = M[macSel]; if (!m) return;
+    if (e.target.id === 'mName') m.name = e.target.value; else if (e.target.id === 'mRep') m.rep = +e.target.value || 1; else if (e.target.id === 'mGap') m.gap = +e.target.value || 0; else if (e.target.id === 'mText') m.text = e.target.value; else return;
+    macCheck(); renderMacroList(); updateDirtyUI(); });
+  ed.addEventListener('change', commit);
+  ed.addEventListener('click', async e => {
+    const b = e.target.closest('[data-add]'); if (!b) return; const t = b.dataset.add;
+    if (t === 'clear') { M[macSel].text = ''; macChanged(true); }
+    else if (t === 'wait') { const v = await ask({ title: 'Chờ bao nhiêu ms?', input: true, value: '100' }); if (v != null && +v >= 0) appendLine('wait ' + (+v | 0)); }
+    else if (t === 'type') { const v = await ask({ title: 'Gõ chữ (ASCII)', input: true, placeholder: 'xin chao' }); if (v) appendLine('type ' + v); }
+    else { pickInfo = { title: 'Chọn phím cho bước «' + t + '»' }; pickCb = code => appendLine(t + ' ' + kn(code)); openPicker(); }
+  });
+}
+function collectMac() { M.forEach((m, i) => mac.set(macEncode(i, m), i * MSLOT)); }
+
+// ----- LED -----
+let ledTimer = 0, ledTk = 0;
+function ledStep(reset) {   // xem trước: chạy đúng thuật toán của firmware
+  if (reset === true) ledTk = 0;
+  const f = ledFrame(clamp(w[LDB] || 2, 1, FX.length), ledTk++);
+  $$('#ledBoard .led-dot').forEach((d, i) => d.classList.toggle('on', !!(f >> i & 1)));
+}
+function renderLed() {
+  const mode = clamp(w[LDB] || 2, 1, FX.length);
+  $('#fxGrid').innerHTML = FX.map((f, i) => '<button type="button" class="fx-card ' + (i + 1 === mode ? 'on' : '') + '" data-m="' + (i + 1) + '"><span class="fx-swatch" style="--sw:linear-gradient(135deg,' + f[2] + ')"></span><span class="fx-txt"><b>' + (i + 1) + ' · ' + f[0] + '</b><small>' + f[1] + '</small></span><span class="fx-check">✓</span></button>').join('');
+  $('#ledFxName').textContent = FX[mode - 1][0]; $('#ledFxDesc').textContent = FX[mode - 1][1]; $('#ledModeBadge').textContent = 'MODE ' + mode;
+  $('#ledBoard').innerHTML = [0, 1, 2, 3, 4, 5].map(() => '<div class="led-dot"></div>').join('');
+  const t = clamp(w[LDB + 1] || 100, 20, 2000); $('#ledTick').value = t; $('#ledTickV').textContent = t + ' ms';
+  clearInterval(ledTimer); ledTimer = 0; ledStep(true);
+  if (view === 'led') ledTimer = setInterval(ledStep, t);
+  $('#ledBat').classList.toggle('on', !!w[LDB + 2]); $('#ledInd').classList.toggle('on', !!w[LDB + 3]);
+}
+function bindLed() {
+  const guard = () => { if (!loaded) { toast('Hãy kết nối bàn phím trước.', 'warn'); return false; } return true; };
+  $('#fxGrid').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b && guard()) { w[LDB] = +b.dataset.m; changed(); } });
+  $('#ledTick').oninput = e => { if (!guard()) return; w[LDB + 1] = +e.target.value; $('#ledTickV').textContent = e.target.value + ' ms'; updateDirtyUI(); };
+  $('#ledTick').onchange = () => commit();
+  $('#ledBat').onclick = () => { if (guard()) { w[LDB + 2] = w[LDB + 2] ? 0 : 1; changed(); } };
+  $('#ledInd').onclick = () => { if (guard()) { w[LDB + 3] = w[LDB + 3] ? 0 : 1; changed(); } };
+}
+
+// ----- kết nối / công cụ -----
+async function ctl(op, arg) { const b = pkt(11, 0, 0); b[1] = op; b[2] = arg || 0; await xf(b); await getInfo(); renderStat(); }
+function renderStat() {
+  const el = $('#conStat'), s = $('#slots');
+  if (!info) { el.innerHTML = '<span class="pill-s">Chưa kết nối</span>'; s.innerHTML = ''; return; }
+  const tr = ['không có', 'USB', 'BLE'][info.tr] || '?';
+  el.innerHTML = '<span class="pill-s ' + (info.usb ? 'ok' : 'warn') + '">USB ' + (info.usb ? 'sẵn sàng' : 'chưa') + '</span><span class="pill-s ' + (info.ble ? 'ok' : '') + '">BLE ' + (info.ble ? 'đã kết nối' : 'chưa kết nối') + '</span><span class="pill-s">Ưu tiên: ' + (info.out ? 'BLE' : 'USB') + '</span><span class="pill-s">Đang gửi qua: ' + tr + '</span><span class="pill-s">Hồ sơ BLE: ' + (info.slot + 1) + '</span>';
+  $('#oUsb').classList.toggle('active', !info.out); $('#oBle').classList.toggle('active', !!info.out);
+  s.innerHTML = [0, 1, 2, 3, 4].map(i => '<button class="btn ' + (i === info.slot ? 'primary' : '') + '" data-slot="' + i + '">' + (i + 1) + '</button>').join('');
+  $$('#slots [data-slot]').forEach(b => b.onclick = () => ctl(3, +b.dataset.slot));
+  $('#devLed').style.background = info.usb || info.ble ? 'var(--ok)' : '';
+}
+function renderTools() {
+  $('#devState').textContent = dev ? 'Đã kết nối' : 'Chưa kết nối';
+  $('#devInfo').innerHTML = info ? [['Firmware', 'v' + info.ver], ['Layer tối đa', info.L], ['Số từ cấu hình', info.NW], ['Macro', info.nmac + ' × ' + info.mslot + ' B'], ['Hiệu ứng LED', info.nfx]].map(r => '<div class="info-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>').join('') : '<p class="empty-mini">Kết nối bàn phím để xem thông tin.</p>';
+}
+function updateConnUI() {
+  const on = !!dev; $('#connCard').classList.toggle('on', on);
+  $('#connTitle').textContent = on ? ((dev.productName) || 'Numpad21') : 'Chưa kết nối';
+  $('#connSub').textContent = on ? 'Đã kết nối · nhớ bấm Lưu' : 'Cắm cáp USB để cấu hình';
+  $('#discBtn').style.display = on ? '' : 'none'; $('#connBtn').style.display = on ? 'none' : '';
+  const mc = $('#mobileConn'); mc.classList.toggle('on', on); mc.querySelector('span').textContent = on ? 'Đã kết nối' : 'Kết nối';
+  $('#saveBtn').disabled = !on || !loaded; ['#defaultsBtn', '#bootBtn', '#oUsb', '#oBle', '#bClr'].forEach(s => $(s).disabled = !on);
+  $('#exportBtn').disabled = $('#importBtn').disabled = !loaded; renderStat(); renderTools();
+}
+async function openDevice(d) {
+  dev = d; if (!dev.opened) await dev.open(); dev.addEventListener('inputreport', onrep);
+  await getInfo();
+  if (info.ver < 11 || info.L !== L || info.nk !== NK || info.NW !== NW) throw new Error('Firmware không khớp — cần firmware v11 trở lên (16 layer, 32 macro; Morse cần v12). Đang là: ver ' + info.ver + ', L ' + info.L + ', NK ' + info.nk + ', NW ' + info.NW + ')');
+  MSLOT = info.mslot; NMAC = info.nmac; await readAll();
+  M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); M0 = JSON.stringify(M);
+  layer = 0; sel = -1; macSel = 0; loaded = true; resetHist(); progDone(); renderAll();
+  clearInterval(pollT); pollT = setInterval(poll, 2000); toast('Đã tải cấu hình từ bàn phím', 'ok');
+}
+async function connect(silent) {
+  if (!navigator.hid) { if (!silent) toast('Trình duyệt không hỗ trợ WebHID. Dùng Chrome hoặc Edge.', 'err'); return; }
+  try {
+    let d = (await navigator.hid.getDevices()).find(x => x.collections.some(c => c.usagePage === 0xFF60));
+    if (!d) { if (silent) return; d = (await navigator.hid.requestDevice({ filters: [{ vendorId: 0xC1A0, usagePage: 0xFF60, usage: 0x61 }] }))[0]; }
+    if (!d) return; await openDevice(d);
+  } catch (e) { console.error(e); dev = null; progDone(); toast('Lỗi: ' + e.message, 'err', 5000); }
+}
+let lastLed = 0;
+async function poll() {
+  try {
+    if (dev && !document.hidden) {
+      await getInfo(); renderStat();
+      if (loaded && info.ver >= 13 && info.led >= 1 && info.led <= FX.length) {   // che do LED doi bang phim tren ban phim: cap nhat app, khong de Luu ghi de ve gia tri cu
+        if (lastLed && info.led !== lastLed) { w[LDB] = w0[LDB] = info.led; renderLed(); updateDirtyUI(); }
+        lastLed = info.led;
+      }
+    }
+  } catch (e) { }
+}
+function onGone() { dev = null; info = null; clearInterval(pollT); updateConnUI(); toast('Đã ngắt kết nối', 'warn'); }
+async function disconnect() { try { if (dev) await dev.close(); } catch (e) { } onGone(); }
+async function saveFlash() {
+  if (!dev || !loaded) { toast('Chưa kết nối bàn phím.', 'warn'); return; }
+  try { collectMac(); } catch (e) { showView('macro'); toast(e.message, 'err', 5000); return; }
+  try { prog('Đang ghi…'); await writeAll(); M0 = JSON.stringify(M); progDone(); updateDirtyUI(); toast('Đã lưu vào bàn phím', 'ok'); }
+  catch (e) { progDone(); toast('Lỗi: ' + e.message, 'err', 5000); }
+}
+async function defaultsDevice() {
+  if (!await ask({ title: 'Về mặc định firmware?', msg: 'Toàn bộ cấu hình và macro trên bàn phím sẽ bị đặt lại.', ok: 'Đặt lại', danger: true })) return;
+  try { await xf(pkt(4, 0, 0)); await xf(pkt(3, 0, 0)); await readAll(); M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); M0 = JSON.stringify(M); layer = 0; sel = -1; resetHist(); progDone(); renderAll(); toast('Đã về mặc định', 'ok'); }
+  catch (e) { progDone(); toast('Lỗi: ' + e.message, 'err'); }
+}
+function exportProfile() {
+  try { collectMac(); } catch (e) { toast(e.message, 'err'); return; }
+  const o = { fw: 'numpad21', ln: LN.slice(), w: Array.from(w), mac: btoa(String.fromCharCode(...mac)) };
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(o)], { type: 'application/json' })); a.download = 'numpad21-config.json'; a.click();
+}
+async function importProfile(file) {
+  try {
+    const o = JSON.parse(await file.text());
+    if (o.fw !== 'numpad21' || o.w.length !== NW) throw new Error('File không đúng định dạng numpad21');
+    const raw = atob(o.mac), m = new Uint8Array(raw.length); for (let i = 0; i < raw.length; i++) m[i] = raw.charCodeAt(i);
+    if (m.length !== mac.length) throw new Error('Kích thước macro không khớp');
+    w.set(o.w); mac.set(m); if (Array.isArray(o.ln)) LN = Array.from({ length: L }, (_, i) => cutBytes(String(o.ln[i] || ''), LNMAX)); M = Array.from({ length: NMAC }, (_, i) => macDecode(i)); layer = 0; sel = -1; changed(); toast('Đã nhập — bấm «Lưu vào bàn phím» để ghi', 'ok');
+  } catch (er) { toast(er.message, 'err', 5000); }
+}
+
+// ----- khung chung -----
+function renderAll() {
+  if (layer >= nl()) layer = nl() - 1;
+  renderLayers(); renderDevice(); renderInspector(); renderLayerInfo(); renderAdv(); renderLed(); renderMorse(); if (view === 'macro') renderMacro(); updateDirtyUI(); updateUndo(); renderTools();
+}
+function showView(v) {
+  view = v; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.view === v)); $$('.view').forEach(s => s.classList.toggle('on', s.id === 'view-' + v));
+  const meta = { keymap: ['Bàn phím', 'Gán phím và layer'], macro: ['Macro', 'Viết chuỗi phím rồi gán vào phím'], morse: ['Morse', 'Gõ chữ bằng 3 phím: chấm, gạch, xong'], adv: ['Nâng cao', 'Tap dance và combo'], led: ['Đèn LED', 'Hiệu ứng và tốc độ 6 dây LED'], conn: ['Kết nối', 'USB, Bluetooth và ghép đôi'], tools: ['Công cụ', 'Hồ sơ, thiết bị và phím tắt'] }[v];
+  $('#viewTitle').textContent = meta[0]; $('#viewSub').textContent = meta[1];
+  if (v === 'macro') renderMacro();
+  if (v === 'led') renderLed(); else { clearInterval(ledTimer); ledTimer = 0; }
+}
+function applyTheme(t) {
+  t = t === 'light' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; ls.set('numpad21.studio.theme', t);
+  $('#themeBtn').innerHTML = (t === 'dark' ? ICON_SUN : ICON_MOON) + '<span>' + (t === 'dark' ? 'Giao diện sáng' : 'Giao diện tối') + '</span>';
+  $('#themeBtn2').innerHTML = t === 'dark' ? ICON_SUN : ICON_MOON;
+}
+const toggleTheme = () => applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+function onKeyDown(e) {
+  if (capturing) {
+    e.preventDefault(); e.stopPropagation();
+    if (e.key === 'Escape') { capturing = false; updateCaptureUI(); return; }
+    const c = hidFromEvent(e); if (c != null && (c < 0x100 || BYCODE.has(c))) { capturing = false; updateCaptureUI(); assign(c); }
+    return;
+  }
+  if (pickerOpen) { if (e.key === 'Escape') { e.preventDefault(); closePicker(); } return; }
+  if (dlgOpen) { if (e.key === 'Escape') { e.preventDefault(); closeDlg(false); } else if (e.key === 'Enter') { e.preventDefault(); const i = $('#dlgInput'); closeDlg(i.hidden ? true : i.value); } return; }
+  const mod = e.ctrlKey || e.metaKey, k = (e.key || '').toLowerCase();
+  if (mod && k === 's') { e.preventDefault(); saveFlash(); return; }
+  const tag = (e.target && e.target.tagName || '').toLowerCase(); const typing = tag === 'input' || tag === 'select' || tag === 'textarea';
+  if (mod && k === 'z' && !e.shiftKey && !typing) { e.preventDefault(); undo(); return; }
+  if (mod && (k === 'y' || (k === 'z' && e.shiftKey)) && !typing) { e.preventDefault(); redo(); return; }
+  if (typing || view !== 'keymap' || !loaded) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); layer = clamp(layer - 1, 0, nl() - 1); sel = -1; renderAll(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); layer = clamp(layer + 1, 0, nl() - 1); sel = -1; renderAll(); }
+  else if (/^[1-9]$/.test(e.key) && !mod && +e.key - 1 < nl()) { layer = +e.key - 1; sel = -1; renderAll(); }
+}
+function bind() {
+  $$('#nav button').forEach(b => b.onclick = () => showView(b.dataset.view));
+  $('#connBtn').onclick = () => connect(false); $('#mobileConn').onclick = () => dev ? showView('conn') : connect(false); $('#discBtn').onclick = disconnect;
+  $('#themeBtn').onclick = $('#themeBtn2').onclick = toggleTheme; $('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo; $('#saveBtn').onclick = saveFlash;
+  $('#pkClose').onclick = closePicker; $('#pkWrap').onclick = e => { if (e.target.id === 'pkWrap') closePicker(); };
+  $('#pkSearch').oninput = renderPicker; $('#pkCap').onclick = () => { capturing = !capturing; updateCaptureUI(); };
+  $('#pkShift').onclick = () => { pkShift = !pkShift; $('#pkShift').classList.toggle('active', pkShift); };
+  $('#pkTrns').onclick = () => assign(1); $('#pkNone').onclick = () => assign(0);
+  $('#pkHexOk').onclick = () => { const v = parseInt($('#pkHex').value, 16); if (!isNaN(v) && v >= 0 && v < 0x10000) assign(v); else toast('Mã hex không hợp lệ', 'warn'); };
+  $('#dlgOk').onclick = () => { const i = $('#dlgInput'); closeDlg(i.hidden ? true : i.value); }; $('#dlgCancel').onclick = () => closeDlg(false);
+  $('#oUsb').onclick = () => ctl(0); $('#oBle').onclick = () => ctl(1);
+  $('#bClr').onclick = async () => { if (await ask({ title: 'Xoá ghép đôi BLE?', msg: 'Toàn bộ 5 hồ sơ ghép đôi sẽ bị xoá.', ok: 'Xoá', danger: true })) ctl(4); };
+  $('#bootBtn').onclick = async () => { if (await ask({ title: 'Vào bootloader?', msg: 'Bàn phím sẽ ngắt kết nối để nạp firmware UF2.', ok: 'Vào bootloader', danger: true })) { try { await xf(Object.assign(pkt(11, 0, 0), { 1: 5 })); } catch (e) { } } };
+  $('#defaultsBtn').onclick = defaultsDevice; $('#exportBtn').onclick = exportProfile; $('#importBtn').onclick = () => $('#fileInput').click();
+  $('#fileInput').onchange = e => { if (e.target.files[0]) importProfile(e.target.files[0]); e.target.value = ''; };
+  document.addEventListener('keydown', onKeyDown, true); bindLayers(); bindAdv(); bindMacro(); bindLed(); bindMorse();
+  navigator.hid && navigator.hid.addEventListener('disconnect', e => { if (e.device === dev) onGone(); });
+}
 const SKINS = [['cream', 'Kem – Đen'], ['rose', 'Hồng – Nâu']];
 function applySkin(k) { const i = Math.max(0, SKINS.findIndex(x => x[0] === k)); $('#device').dataset.skin = SKINS[i][0]; $('#skinBtn').textContent = 'Màu phím: ' + SKINS[i][1]; ls.set('numpad21.studio.skin', SKINS[i][0]); }
 $('#skinBtn').onclick = () => applySkin(SKINS[(SKINS.findIndex(x => x[0] === $('#device').dataset.skin) + 1) % SKINS.length][0]);
